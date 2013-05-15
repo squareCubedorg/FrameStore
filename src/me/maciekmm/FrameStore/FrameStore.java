@@ -147,7 +147,7 @@ public class FrameStore extends JavaPlugin {
         {
             if(args.length>0)
             {
-                if(args[0].equalsIgnoreCase("reload")&&sender.hasPermission("frameshop.admin"))
+                if(args[0].equalsIgnoreCase("reload")&&sender.hasPermission("framestore.admin"))
                 {
                     this.reloadConfig();
                     reloadShopConfig();
@@ -182,7 +182,7 @@ public class FrameStore extends JavaPlugin {
             "313:items/bootsDiamond.png",
             "317:items/bootsGold.png",
             "309:items/bootsIron.png",
-            "261:items/bow.png",//skon
+            "261:items/bow.png",
             "281:items/bowl.png",
             "297:items/bread.png",
             "379:items/brewingStand.png",
@@ -345,7 +345,6 @@ public class FrameStore extends JavaPlugin {
             "386:items/writingBook.png",
             "387:items/writtenBook.png",
             "348:items/yellowDust.png",
-            //koniec itemow
             "157:blocks/activatorRail.png",
             "145:blocks/anvil_top.png",
             "138:blocks/beacon.png",

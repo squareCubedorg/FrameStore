@@ -173,7 +173,11 @@ public class ShopListeners implements Listener {
                             ArrayList<Object> al = new ArrayList<>();
                             al.add(0, 1);
                             al.add(1, Serializer.serializeLoc(enn.getLocation()));
-                            p.sendMessage(ChatColor.DARK_RED + "What type should it be (Shop-1, Purchase-2):");
+                            if (p.hasPermission("framestore.admin")) {
+                                p.sendMessage(ChatColor.DARK_RED + "Shop is 1, Purchase is 2, AdminShop shop is 3, AdminShop purchase is 4");
+                            } else {
+                                p.sendMessage(ChatColor.DARK_RED + "What type should it be (Shop-1, Purchase-2):");
+                            }
                             functions.getShopSet().put(p.getName(), al);
                         } else if (sd.getIntData(2) == 0 && sd.getStringData(1) != null) {
                             ArrayList<Object> al = new ArrayList<>();
@@ -283,7 +287,7 @@ public class ShopListeners implements Listener {
                 final String slc = String.valueOf(mode.get(1));
                 switch ((int) mode.get(0)) {
                     case 1:
-                        if (am == 2 || am == 1 || (p.hasPermission("frameshop.admin") && am > 0 && am <= 4)) {
+                        if (am == 2 || am == 1 || (p.hasPermission("framestore.admin") && am > 0 && am <= 4)) {
                             frameshop.getServer().getScheduler().runTask(frameshop, new Runnable() {
                                 @Override
                                 public void run() {
@@ -298,7 +302,7 @@ public class ShopListeners implements Listener {
                             functions.getShopSet().get(p.getName()).set(0, 2);
                             p.sendMessage(ChatColor.DARK_RED + "Now set the amount:");
 
-                        } else if (p.hasPermission("frameshop.admin")) {
+                        } else if (p.hasPermission("framestore.admin")) {
                             p.sendMessage(ChatColor.DARK_RED + "Shop is 1, Purchase is 2, AdminShop shop is 3, AdminShop purchase is 4");
                         } else {
                             p.sendMessage(ChatColor.DARK_RED + "Shop is 1, Purchase is 2");
@@ -315,7 +319,6 @@ public class ShopListeners implements Listener {
 
                                 }
                             });
-                            //EcoListeners.functions.getShopSet().remove(p.getName());
                             p.sendMessage(ChatColor.DARK_GREEN + "You have successfully set sell amount.");
                             functions.getShopSet().get(p.getName()).set(0, 3);
                             p.sendMessage(ChatColor.DARK_RED + "Now set the cost:");
