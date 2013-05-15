@@ -40,7 +40,7 @@ public class ShopListeners implements Listener {
     public void onPlayerCreateShop(HangingPlaceEvent e) {
         Entity en = e.getEntity();
         Player p = e.getPlayer();
-        if (en instanceof ItemFrame && p.getItemInHand().getItemMeta().hasLore() && p.hasPermission("frameshop.create")) {
+        if (en instanceof ItemFrame && p.getItemInHand().getItemMeta().hasLore() && p.hasPermission("framestore.create")) {
             Iterator<Entity> it = en.getNearbyEntities(0.3, 0.3, 0.3).iterator();
             while (it.hasNext()) {
                 if (it.next() instanceof ItemFrame) {
