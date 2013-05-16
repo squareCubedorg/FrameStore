@@ -73,7 +73,7 @@ public class FrameStore extends JavaPlugin {
                 log.info("Dumping data to database");
             }
         }, 20000L, 40000L);
-        if (!new File(this.getDataFolder() + File.separator + "textures" + File.separator + "minecraft.jar").exists()) {
+        if (!new File(this.getDataFolder() + File.separator + "textures" + File.separator + "minecraft.jar").exists()&&this.getConfig().getBoolean("downloadimages")) {
             this.getServer().getScheduler().runTaskAsynchronously(this, new Runnable() {
                 @Override
                 public void run() {
@@ -466,6 +466,7 @@ public class FrameStore extends JavaPlugin {
             String[] s = value.split(":");
             this.getConfig().addDefault("pictures." + s[0], s[1]);
         }
+        this.getConfig().addDefault("downloadimages", true);
         this.getConfig().options().copyDefaults(true);
         this.saveConfig();
     }
