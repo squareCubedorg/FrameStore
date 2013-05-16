@@ -113,7 +113,7 @@ public class ShopData {
 
         Location nl = sl.clone();
         nl.setY(nl.getY() - 0.3);
-        Entity e = Bukkit.getWorlds().get(0).spawnArrow(nl, new Vector(0, 0, 0), 0, 0);
+        Entity e = nl.getWorld().spawnArrow(nl, new Vector(0, 0, 0), 0, 0);
         Iterator<Entity> it = e.getNearbyEntities(0.3, 0.3, 0.3).iterator();
         e.remove();
         MapView mv = pl.getServer().createMap(pl.getServer().getWorlds().get(0));
