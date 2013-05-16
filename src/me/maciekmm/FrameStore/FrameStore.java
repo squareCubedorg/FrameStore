@@ -462,11 +462,12 @@ public class FrameStore extends JavaPlugin {
             "5@1:blocks/wood_spruce.png",
             "58:blocks/workbench_front.png"
         };
+        this.getConfig().addDefault("downloadimages", true);
         for (String value : Arrays.asList(pictures)) {
             String[] s = value.split(":");
             this.getConfig().addDefault("pictures." + s[0], s[1]);
         }
-        this.getConfig().addDefault("downloadimages", true);
+        
         this.getConfig().options().copyDefaults(true);
         this.saveConfig();
     }
