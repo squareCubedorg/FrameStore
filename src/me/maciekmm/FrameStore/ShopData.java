@@ -4,16 +4,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static me.maciekmm.FrameStore.ShopListeners.MAGIC_NUMBER;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.map.MapRenderer;
 import org.bukkit.map.MapView;
 import org.bukkit.util.Vector;
@@ -46,6 +49,7 @@ public class ShopData {
                 datad[0] = rs.getDouble("cost");
                 si = Serializer.fromBase64(rs.getString("inv"));
                 sl = Serializer.unserializeLoc(rs.getString("loc"));
+                imsd = Serializer.toItemMeta(rs.getString("enchantments"));
 
             } catch (SQLException ex) {
                 Logger.getLogger(ShopData.class.getName()).log(Level.SEVERE, null, ex);
@@ -87,6 +91,13 @@ public class ShopData {
             } else {
                 si = null;
             }
+            if (ShopListeners.frameshop.getShopConfig().getString(sr + ".enchantments") !=null) {
+                imsd = Serializer.toItemMeta(ShopListeners.frameshop.getShopConfig().getString(sr+".enchantments"));
+            }
+            else
+            {
+                imsd = null;
+            }
             sl = Serializer.unserializeLoc(s);
             ShopListeners.frameshop.saveShopConfig();
         }
@@ -126,7 +137,7 @@ public class ShopData {
                 for (MapRenderer mr : mv.getRenderers()) {
                     mv.removeRenderer(mr);
                 }
-                mv.addRenderer(new Renderer(pl, true, datas[1], datad[0], datai[2], datas[0], datai[4],datai[1],datai[3]));
+                mv.addRenderer(new Renderer(pl, true, datas[1], datad[0], datai[2], datas[0], datai[4],datai[1],datai[3],imsd));
                 m.setDurability(mv.getId());
                 ((ItemFrame) sd).setItem(m);
                 map = mv;
@@ -164,7 +175,13 @@ public class ShopData {
     public void setData(int nr, double content) {
         datad[nr] = content;
     }
-
+    
+    public void setEnch(Map<Enchantment,Integer> m) {
+        imsd= m;
+    }
+    public Map<Enchantment,Integer> getEnch() {
+        return imsd;
+    }
     public Location getLoc() {
         return sl;
     }
@@ -179,7 +196,8 @@ public class ShopData {
                     + "`idd`=" + datai[1] + ", "
                     + "`amount`=" + datai[2] + ", "
                     + "`data`=" + datai[3] + ", "
-                    + "`type`=" + datai[4]
+                    + "`type`=" + datai[4] +", "
+                    + "`enchantments`="+ imsd
                     + " WHERE loc='" + Serializer.serializeLoc(sl) + "'";
             Database.db.query(query, true);
         } else {
@@ -191,7 +209,8 @@ public class ShopData {
                 "amount:" + datai[2],
                 "data:" + datai[3],
                 "type:" + datai[4],
-                "inv:" + Serializer.toBase64(si),};
+                "inv:" + Serializer.toBase64(si),
+                "enchantments:" + Serializer.serializeEnch(imsd)};
             for (String value : Arrays.asList(pictures)) {
                 String[] s = value.split(":");
                 ShopListeners.frameshop.getShopConfig().set(sr + "." + s[0], s[1]);
@@ -220,4 +239,5 @@ public class ShopData {
     private Inventory si;
     private Location sl;
     private MapView map;
+    private Map<Enchantment, Integer> imsd;
 }

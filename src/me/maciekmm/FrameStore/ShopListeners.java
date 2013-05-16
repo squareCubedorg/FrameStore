@@ -19,6 +19,7 @@ import org.bukkit.event.hanging.HangingBreakEvent.RemoveCause;
 import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.map.MapRenderer;
@@ -60,7 +61,7 @@ public class ShopListeners implements Listener {
             for (MapRenderer mr : mv.getRenderers()) {
                 mv.removeRenderer(mr);
             }
-            mv.addRenderer(new Renderer(frameshop, true, null, 0, 0, e.getPlayer().getName(), 0, 0, 0));
+            mv.addRenderer(new Renderer(frameshop, true, null, 0, 0, e.getPlayer().getName(), 0, 0, 0, null));
             m.setDurability(mv.getId());
             enn.setItem(m);
         } else if (p.getItemInHand().getItemMeta().hasLore() && !p.hasPermission("frameshop.create")) {
@@ -168,6 +169,7 @@ public class ShopListeners implements Listener {
                             sd.setData(1, iih.getType().name().toLowerCase());
                             sd.setData(1, (int) iih.getTypeId());
                             sd.setData(3, (int) iih.getData().getData());
+                            sd.setEnch(iih.getItemMeta().getEnchants());
                             sd.reRender(frameshop);
                         } else if (sd.getIntData(4) == 0 && sd.getStringData(1) != null) {
                             ArrayList<Object> al = new ArrayList<>();
@@ -198,17 +200,21 @@ public class ShopListeners implements Listener {
                         if (sd.getIntData(4) == 1) {
                             if (sd.getInv() != null && sd.getIntData(4) != 0 && sd.getIntData(1) != 0 && sd.getIntData(2) != 0 && functions.checkItems(sd.getInv(), new ItemStack(sd.getIntData(1), sd.getIntData(2)))) {
                                 ItemStack con = new ItemStack(sd.getIntData(1), sd.getIntData(2), (byte) sd.getIntData(3));
+                                if(!sd.getEnch().isEmpty())
+                                {
+                                    Serializer.addEnchantments(con, sd.getEnch());
+                                }
                                 if (e.getPlayer().getInventory().firstEmpty() == -1) {
                                     p.sendMessage(ChatColor.DARK_RED + "You don't have space in inventory!");
                                     return;
                                 }
-                                if (FrameStore.econ.getBalance(p.getName()) < sd.getDoubleData(0)) {
+                                if (!FrameStore.econ.withdrawPlayer(p.getName(), sd.getDoubleData(0)).transactionSuccess()) {
 
                                     p.sendMessage(ChatColor.DARK_RED + "You don't have enough money!");
                                     return;
                                 }
-
-                                FrameStore.econ.withdrawPlayer(p.getName(), sd.getDoubleData(0));
+                                System.out.println(sd.getDoubleData(0));                      
+                                FrameStore.econ.depositPlayer(sd.getStringData(0), sd.getDoubleData(0));
                                 functions.consumeItems(sd.getInv(), con);
                                 p.sendMessage(ChatColor.DARK_GREEN + "You bought " + sd.getIntData(2) + " of " + sd.getStringData(1));
                                 p.getInventory().addItem(con);
@@ -218,11 +224,11 @@ public class ShopListeners implements Listener {
                         } else if (sd.getIntData(4) == 2) {
                             if (sd.getInv() != null && sd.getIntData(4) != 0 && sd.getIntData(1) != 0 && functions.checkItems(e.getPlayer().getInventory(), new ItemStack(sd.getIntData(1), sd.getIntData(2))) && sd.getInv().firstEmpty() != -1) {
                                 ItemStack con = new ItemStack(sd.getIntData(1), sd.getIntData(2), (byte) sd.getIntData(3));
-                                if (FrameStore.econ.getBalance(Bukkit.getOfflinePlayer(sd.getStringData(0)).getName()) < sd.getDoubleData(0)) {
+                                if (!FrameStore.econ.withdrawPlayer(Bukkit.getOfflinePlayer(sd.getStringData(0)).getName(), sd.getDoubleData(0)).transactionSuccess()) {
                                     p.sendMessage(ChatColor.DARK_RED + "Shop owner doesn't have enough money!");
                                     return;
                                 }
-                                FrameStore.econ.withdrawPlayer(Bukkit.getOfflinePlayer(sd.getStringData(0)).getName(), sd.getDoubleData(0));
+                                
                                 FrameStore.econ.depositPlayer(p.getName(), sd.getDoubleData(0));
                                 functions.consumeItems(e.getPlayer().getInventory(), con);
                                 p.sendMessage(ChatColor.DARK_GREEN + "You sold " + sd.getIntData(2) + " of " + sd.getStringData(1));
@@ -233,15 +239,20 @@ public class ShopListeners implements Listener {
                         } else if (sd.getIntData(4) == 3) {
                             if (sd.getIntData(4) != 0 && sd.getIntData(1) != 0 && sd.getIntData(2) != 0) {
                                 ItemStack con = new ItemStack(sd.getIntData(1), sd.getIntData(2), (byte) sd.getIntData(3));
+                                if(!sd.getEnch().isEmpty())
+                                {
+                                    Serializer.addEnchantments(con, sd.getEnch());
+                                }
                                 if (e.getPlayer().getInventory().firstEmpty() == -1) {
                                     p.sendMessage(ChatColor.DARK_RED + "You don't have space in inventory!");
                                     return;
                                 }
-                                if (FrameStore.econ.getBalance(p.getName()) < sd.getDoubleData(0)) {
+                                if (!FrameStore.econ.withdrawPlayer(p.getName(), sd.getDoubleData(0)).transactionSuccess()) {
 
                                     p.sendMessage(ChatColor.DARK_RED + "You don't have enough money!");
                                     return;
                                 }
+                                
                                 p.sendMessage(ChatColor.DARK_GREEN + "You bought " + sd.getIntData(2) + " of " + sd.getStringData(1));
                                 p.getInventory().addItem(con);
 
@@ -251,6 +262,10 @@ public class ShopListeners implements Listener {
                         } else if (sd.getIntData(4) == 4) {
                             if (sd.getInv() != null && sd.getIntData(4) != 0 && sd.getIntData(1) != 0 && functions.checkItems(e.getPlayer().getInventory(), new ItemStack(sd.getIntData(1), sd.getIntData(2)))) {
                                 ItemStack con = new ItemStack(sd.getIntData(1), sd.getIntData(2), (byte) sd.getIntData(3));
+                                if(!sd.getEnch().isEmpty())
+                                {
+                                    Serializer.addEnchantments(con, sd.getEnch());
+                                }
                                 FrameStore.econ.depositPlayer(p.getName(), sd.getDoubleData(0));
                                 functions.consumeItems(e.getPlayer().getInventory(), con);
                                 p.sendMessage(ChatColor.DARK_GREEN + "You sold " + sd.getIntData(2) + " of " + sd.getStringData(1));
@@ -350,5 +365,10 @@ public class ShopListeners implements Listener {
 
             }
         }
+    }
+    @EventHandler
+    public void onPlayerSpawn(PlayerJoinEvent e) { //Post Login Event, when sending maps in login event player(entity) was not spawned
+        ShopListeners.functions.sendMaps(e.getPlayer());
+
     }
 }
