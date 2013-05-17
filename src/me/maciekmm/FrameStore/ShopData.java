@@ -58,40 +58,27 @@ public class ShopData {
             String sr = s.replaceAll("\\.", "@");
             datas = new String[2];
             datas[0] = ShopListeners.frameshop.getShopConfig().getString(sr + ".owner");
+            if (ShopListeners.frameshop.getShopConfig().getString(sr + ".mat")!=null&&!ShopListeners.frameshop.getShopConfig().getString(sr + ".mat").equalsIgnoreCase("null")) {
             datas[1] = ShopListeners.frameshop.getShopConfig().getString(sr + ".mat");
+            }
+            else
+            {
+                datas[1]=null;
+            }
             datai = new int[5];
-            if (ShopListeners.frameshop.getShopConfig().getString(sr + ".idd") != null) {
-                datai[1] = Integer.valueOf(ShopListeners.frameshop.getShopConfig().getString(sr + ".idd"));
-            } else {
-                datai[1] = 0;
-            }
-            if (ShopListeners.frameshop.getShopConfig().getString(sr + ".amount") != null) {
-                datai[2] = Integer.valueOf(ShopListeners.frameshop.getShopConfig().getString(sr + ".amount"));
-            } else {
-                datai[2] = 0;
-            }
-            if (ShopListeners.frameshop.getShopConfig().getString(sr + ".data") != null) {
-                datai[3] = Integer.valueOf(ShopListeners.frameshop.getShopConfig().getString(sr + ".data"));
-            } else {
-                datai[3] = 0;
-            }
-            if (ShopListeners.frameshop.getShopConfig().getString(sr + ".type") != null) {
-                datai[4] = Integer.valueOf(ShopListeners.frameshop.getShopConfig().getString(sr + ".type"));
-            } else {
-                datai[4] = 0;
-            }
+            datai[1] = ShopListeners.frameshop.getShopConfig().getInt(sr + ".idd");
+            datai[2] = ShopListeners.frameshop.getShopConfig().getInt(sr + ".amount");
+            datai[3] = ShopListeners.frameshop.getShopConfig().getInt(sr + ".data");
+            datai[4] = ShopListeners.frameshop.getShopConfig().getInt(sr + ".type");
             datad = new double[1];
-            if (ShopListeners.frameshop.getShopConfig().getString(sr + ".cost") != null) {
-                datad[0] = Double.valueOf(ShopListeners.frameshop.getShopConfig().getString(sr + ".cost"));
-            } else {
-                datad[0] = 0;
-            }
+            datad[0] = ShopListeners.frameshop.getShopConfig().getDouble(sr + ".cost");
+
             if (ShopListeners.frameshop.getShopConfig().getString(sr + ".inv") != null) {
                 si = Serializer.fromBase64(ShopListeners.frameshop.getShopConfig().getString(sr + ".inv"));
             } else {
                 si = null;
             }
-            if (ShopListeners.frameshop.getShopConfig().getString(sr + ".enchantments") !=null) {
+            if (ShopListeners.frameshop.getShopConfig().getString(sr + ".enchantments")!=null&&!ShopListeners.frameshop.getShopConfig().getString(sr + ".enchantments").equalsIgnoreCase("null")) {
                 imsd = Serializer.toItemMeta(ShopListeners.frameshop.getShopConfig().getString(sr+".enchantments"));
             }
             else
@@ -204,17 +191,27 @@ public class ShopData {
             String sr = Serializer.serializeLoc(sl).replaceAll("\\.", "@");
             String[] pictures = {"owner:" + datas[0],
                 "mat:" + datas[1],
-                "cost:" + datad[0],
+                "inv:" + Serializer.toBase64(si)
+                };
+            String[] ints = {
                 "idd:" + datai[1],
                 "amount:" + datai[2],
                 "data:" + datai[3],
-                "type:" + datai[4],
-                "inv:" + Serializer.toBase64(si),
-                "enchantments:" + Serializer.serializeEnch(imsd)};
+                "type:" + datai[4]
+                };
+            if(imsd!=null&&!imsd.isEmpty())
+            {
+            pictures[pictures.length] = "enchantments:" + Serializer.serializeEnch(imsd);
+            }
             for (String value : Arrays.asList(pictures)) {
                 String[] s = value.split(":");
-                ShopListeners.frameshop.getShopConfig().set(sr + "." + s[0], s[1]);
+                 ShopListeners.frameshop.getShopConfig().set(sr + "." + s[0], s[1]);
             }
+             for (String value : Arrays.asList(ints)) {
+                String[] s = value.split(":");
+                 ShopListeners.frameshop.getShopConfig().set(sr + "." + s[0], Integer.parseInt(s[1]));
+            }
+             ShopListeners.frameshop.getShopConfig().set(sr + "." + "cost", datad[0]);
             ShopListeners.frameshop.saveShopConfig();
         }
     }
