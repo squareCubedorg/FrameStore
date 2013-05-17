@@ -94,11 +94,9 @@ public class Renderer extends MapRenderer {
           line++;
         }
         }
-        if (seller != null) {
+        if (seller != null&&(type!=3||type!=4)) {
             canvas.drawText(6, 125 - fh, MinecraftFont.Font, "Owner: §16;" + seller);
         }
-
-        //canvas.drawText(127 - MinecraftFont.Font.getWidth("     EconomyLife"), 125 - fh, MinecraftFont.Font, "§12;EconomyLife" + cost);
         if (redrawneeded) {
             redrawneeded = false;
             for (Player pm : Bukkit.getOnlinePlayers()) {

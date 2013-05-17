@@ -58,12 +58,10 @@ public class ShopData {
             String sr = s.replaceAll("\\.", "@");
             datas = new String[2];
             datas[0] = ShopListeners.frameshop.getShopConfig().getString(sr + ".owner");
-            if (ShopListeners.frameshop.getShopConfig().getString(sr + ".mat")!=null&&!ShopListeners.frameshop.getShopConfig().getString(sr + ".mat").equalsIgnoreCase("null")) {
-            datas[1] = ShopListeners.frameshop.getShopConfig().getString(sr + ".mat");
-            }
-            else
-            {
-                datas[1]=null;
+            if (ShopListeners.frameshop.getShopConfig().getString(sr + ".mat") != null && !ShopListeners.frameshop.getShopConfig().getString(sr + ".mat").equalsIgnoreCase("null")) {
+                datas[1] = ShopListeners.frameshop.getShopConfig().getString(sr + ".mat");
+            } else {
+                datas[1] = null;
             }
             datai = new int[5];
             datai[1] = ShopListeners.frameshop.getShopConfig().getInt(sr + ".idd");
@@ -78,11 +76,9 @@ public class ShopData {
             } else {
                 si = null;
             }
-            if (ShopListeners.frameshop.getShopConfig().getString(sr + ".enchantments")!=null&&!ShopListeners.frameshop.getShopConfig().getString(sr + ".enchantments").equalsIgnoreCase("null")) {
-                imsd = Serializer.toItemMeta(ShopListeners.frameshop.getShopConfig().getString(sr+".enchantments"));
-            }
-            else
-            {
+            if (ShopListeners.frameshop.getShopConfig().getString(sr + ".enchantments") != null && !ShopListeners.frameshop.getShopConfig().getString(sr + ".enchantments").equalsIgnoreCase("null")) {
+                imsd = Serializer.toItemMeta(ShopListeners.frameshop.getShopConfig().getString(sr + ".enchantments"));
+            } else {
                 imsd = null;
             }
             sl = Serializer.unserializeLoc(s);
@@ -124,7 +120,7 @@ public class ShopData {
                 for (MapRenderer mr : mv.getRenderers()) {
                     mv.removeRenderer(mr);
                 }
-                mv.addRenderer(new Renderer(pl, true, datas[1], datad[0], datai[2], datas[0], datai[4],datai[1],datai[3],imsd));
+                mv.addRenderer(new Renderer(pl, true, datas[1], datad[0], datai[2], datas[0], datai[4], datai[1], datai[3], imsd));
                 m.setDurability(mv.getId());
                 ((ItemFrame) sd).setItem(m);
                 map = mv;
@@ -162,13 +158,15 @@ public class ShopData {
     public void setData(int nr, double content) {
         datad[nr] = content;
     }
-    
-    public void setEnch(Map<Enchantment,Integer> m) {
-        imsd= m;
+
+    public void setEnch(Map<Enchantment, Integer> m) {
+        imsd = m;
     }
-    public Map<Enchantment,Integer> getEnch() {
+
+    public Map<Enchantment, Integer> getEnch() {
         return imsd;
     }
+
     public Location getLoc() {
         return sl;
     }
@@ -183,8 +181,8 @@ public class ShopData {
                     + "`idd`=" + datai[1] + ", "
                     + "`amount`=" + datai[2] + ", "
                     + "`data`=" + datai[3] + ", "
-                    + "`type`=" + datai[4] +", "
-                    + "`enchantments`="+ imsd
+                    + "`type`=" + datai[4] + ", "
+                    + "`enchantments`=" + imsd
                     + " WHERE loc='" + Serializer.serializeLoc(sl) + "'";
             Database.db.query(query, true);
         } else {
@@ -192,26 +190,25 @@ public class ShopData {
             String[] pictures = {"owner:" + datas[0],
                 "mat:" + datas[1],
                 "inv:" + Serializer.toBase64(si)
-                };
+            };
             String[] ints = {
                 "idd:" + datai[1],
                 "amount:" + datai[2],
                 "data:" + datai[3],
                 "type:" + datai[4]
-                };
-            if(imsd!=null&&!imsd.isEmpty())
-            {
-            pictures[pictures.length] = "enchantments:" + Serializer.serializeEnch(imsd);
+            };
+            if (imsd != null && !imsd.isEmpty()) {
+                pictures[pictures.length] = "enchantments:" + Serializer.serializeEnch(imsd);
             }
             for (String value : Arrays.asList(pictures)) {
                 String[] s = value.split(":");
-                 ShopListeners.frameshop.getShopConfig().set(sr + "." + s[0], s[1]);
+                ShopListeners.frameshop.getShopConfig().set(sr + "." + s[0], s[1]);
             }
-             for (String value : Arrays.asList(ints)) {
+            for (String value : Arrays.asList(ints)) {
                 String[] s = value.split(":");
-                 ShopListeners.frameshop.getShopConfig().set(sr + "." + s[0], Integer.parseInt(s[1]));
+                ShopListeners.frameshop.getShopConfig().set(sr + "." + s[0], Integer.parseInt(s[1]));
             }
-             ShopListeners.frameshop.getShopConfig().set(sr + "." + "cost", datad[0]);
+            ShopListeners.frameshop.getShopConfig().set(sr + "." + "cost", datad[0]);
             ShopListeners.frameshop.saveShopConfig();
         }
     }

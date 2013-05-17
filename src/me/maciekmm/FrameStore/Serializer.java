@@ -120,8 +120,7 @@ public class Serializer {
     }
 
     public static Map<Enchantment, Integer> toItemMeta(String s) {
-        if (!s.equalsIgnoreCase("null")&&s != null) {
-            System.out.println(s);
+        if (s != null&&!s.equalsIgnoreCase("null")) {
             Map<Enchantment, Integer> em = new HashMap<>();
             String[] eslist = s.split("!");
             for (int i = 0; i <= eslist.length - 1; i++) {
