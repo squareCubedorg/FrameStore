@@ -26,7 +26,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -39,6 +38,8 @@ public class FrameStore extends JavaPlugin {
     public static String type;
     private FileConfiguration shopConfig = null;
     private File shopConfigFile = null;
+    private List<String> lores = new ArrayList<>();
+    private ItemStack is;
 
     @Override
     public void onEnable() {
@@ -52,14 +53,13 @@ public class FrameStore extends JavaPlugin {
         } else {
             reloadShopConfig();
         }
-        List<String> lores = new ArrayList<>();
+        is = new ItemStack(Material.ITEM_FRAME, 1);
+        ItemMeta im = is.getItemMeta();
         lores.add("Place a shop and trade!");
-        ItemStack ifr = new ItemStack(Material.ITEM_FRAME,1);
-        ItemMeta im = ifr.getItemMeta();
         im.setDisplayName("Shop");
         im.setLore(lores);
-        ifr.setItemMeta(im);
-        ShapelessRecipe r = new ShapelessRecipe(ifr);
+        is.setItemMeta(im);
+        ShapelessRecipe r = new ShapelessRecipe(is);
         r.addIngredient(Material.ITEM_FRAME);
         r.addIngredient(Material.CHEST);
         Bukkit.addRecipe(r);
@@ -72,7 +72,7 @@ public class FrameStore extends JavaPlugin {
                 log.info("Dumping data to database");
             }
         }, 20000L, 40000L);
-        if (!new File(this.getDataFolder() + File.separator + "textures" + File.separator + "minecraft.jar").exists()&&this.getConfig().getBoolean("downloadimages")) {
+        if (!new File(this.getDataFolder() + File.separator + "textures" + File.separator + "minecraft.jar").exists() && this.getConfig().getBoolean("downloadimages")) {
             this.getServer().getScheduler().runTaskAsynchronously(this, new Runnable() {
                 @Override
                 public void run() {
@@ -140,26 +140,24 @@ public class FrameStore extends JavaPlugin {
         ShopListeners.functions.clearer();
         Database.db = null;
     }
+
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if(label.equalsIgnoreCase("fs"))
-        {
-            if(args.length>0)
-            {
-                if(args[0].equalsIgnoreCase("reload")&&sender.hasPermission("framestore.admin"))
-                {
+        if (label.equalsIgnoreCase("fs")) {
+            if (args.length > 0) {
+                if (args[0].equalsIgnoreCase("reload") && sender.hasPermission("framestore.admin")) {
                     this.reloadConfig();
-                    reloadShopConfig();
-                    sender.sendMessage(ChatColor.DARK_GREEN+"Successfully reloaded configs!");
+                    sender.sendMessage(ChatColor.DARK_GREEN + "Successfully reloaded config!");
                     return true;
                 }
-            }
-            else
-            {
+            } else {
                 sender.sendMessage("Available arguments: reload");
+                return true;
             }
         }
-        return false;}
+        return false;
+    }
+
     private void loadConfiguration() {
         this.getConfig().addDefault("database.type", "flat");
         this.getConfig().addDefault("database.login", "login");
@@ -359,7 +357,6 @@ public class FrameStore extends JavaPlugin {
             "45:blocks/brick.png",
             "81:blocks/cactus_side.png",
             "354:blocks/cake_top.png",
-          // "118:blocks/cauldron_side.png",
             "82:blocks/clay.png",
             "35@0:blocks/cloth_0.png",
             "35@1:blocks/cloth_1.png",
@@ -461,12 +458,63 @@ public class FrameStore extends JavaPlugin {
             "5@1:blocks/wood_spruce.png",
             "58:blocks/workbench_front.png"
         };
+        String[] mapmessages = {
+            "types.buy@§28;Buy (Right click to buy)",
+            "types.sell@§16;Sell (Right click to sell)",
+            "types.adminshop.buy.glob@§28;AdminShop Buy",
+            "types.adminshop.buy.desc@§20;Right click to buy",
+            "types.adminshop.sell.glob@§16;AdminShop Sell",
+            "types.adminshop.sell.desc@§10;Right click to sell",
+            "types.notconf@§16;Not configurated",
+            "misc.noitem@Empty Shop",
+            "misc.cost@Cost: §28;",
+            "misc.amount@Amount: §28;",
+            "misc.id@Id: ",
+            "misc.enchantments@Enchantments:",
+            "misc.owner@Owner: §16;"
+        };
+        String[] confmessages = {
+            "interacting.buying.errors.notenoughspace@You don't have space in inventory.",
+            "interacting.buying.errors.notenoughmoney@You don't have enough money.",
+            "interacting.buying.errors.noitems@Shop's container doesn't have enough items.",
+            "interacting.buying.success@You bought %amount% of %name%",
+            "interacting.selling.success@You sold %amount% of %name%",
+            "interacting.selling.errors.notenoughmoney@Shop owner doesn't have enough money.",
+            "interacting.selling.errors.ownernotenoughspace@Shop's container doesn't have enough space.",
+            "interacting.selling.errors.noitems@You don't have items to sell.",
+            "interacting.errors.notconfigured@Shop is not configured.",
+            "interacting.puttingmapinside@You can't put map in itemframe!",
+            "creating.global.created@You successfully created empty shop. Now click with item on frame.",
+            "creating.global.settingtype@What type should it be (Shop-1, Sell-2):",
+            "creating.global.settingamount@Type what amount you'd like to sell or buy:",
+            "creating.global.settingcost@Now set the cost:",
+            "creating.global.settingitem@Set the item type.",
+            "creating.global.passsettingtype@You have successfully set shop type.",
+            "creating.global.passsettingamount@You have successfully set sell amount.",
+            "creating.global.passsettingcost@You have successfully set sell cost.",
+            "creating.global.passsettingitem@Set the item type.",
+            "creating.global.admin.settingtype@Shop is 1, Purchase is 2, AdminShop shop is 3, AdminShop sell is 4",
+            "creating.errors.invalidcost@Cost must be greater than 0",
+            "creating.errors.othershopoverlaying@You cannot place shop here, other shop is here!",
+            "creating.errors.permdenied@You are not permitted to create shops!",
+            "destroying.errors.notanowner@You are not a shop owner!",
+            "destroying.success@Successfully removed shop."};
         this.getConfig().addDefault("downloadimages", true);
+        this.getConfig().addDefault("map.drawowner", true);
+        this.getConfig().addDefault("map.drawid", true);
+        for (String value : Arrays.asList(mapmessages)) {
+            String[] s = value.split("@");
+            this.getConfig().addDefault("mapmessages." + s[0], s[1]);
+        }
+        for (String value : Arrays.asList(confmessages)) {
+            String[] s = value.split("@");
+            this.getConfig().addDefault("confmessages." + s[0], s[1]);
+        }
         for (String value : Arrays.asList(pictures)) {
             String[] s = value.split(":");
             this.getConfig().addDefault("pictures." + s[0], s[1]);
         }
-        
+
         this.getConfig().options().copyDefaults(true);
         this.saveConfig();
     }
@@ -506,5 +554,18 @@ public class FrameStore extends JavaPlugin {
         }
         econ = rsp.getProvider();
         return econ != null;
+    }
+
+    public ItemStack getFrameItem() {
+        return is;
+    }
+
+    public String getMessage(String s) {
+        if (this.getConfig().getString(s) != null) {
+            return this.getConfig().getString(s);
+        } else {
+            return "Error in lang config " + s;
+        }
+
     }
 }
