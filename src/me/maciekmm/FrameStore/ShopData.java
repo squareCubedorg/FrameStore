@@ -39,6 +39,7 @@ public class ShopData {
                 datas = new String[2];
                 datas[0] = rs.getString("owner");
                 datas[1] = rs.getString("mat");
+                datas[2] = rs.getString("name");
                 datai = new int[5];
                 datai[1] = rs.getInt("idd");
                 datai[2] = rs.getInt("amount");
@@ -55,7 +56,7 @@ public class ShopData {
             }
         } else {
             String sr = s.replaceAll("\\.", "@");
-            datas = new String[2];
+            datas = new String[3];
             datas[0] = ShopListeners.frameshop.getShopConfig().getString(sr + ".owner");
             if (ShopListeners.frameshop.getShopConfig().getString(sr + ".mat") != null && !ShopListeners.frameshop.getShopConfig().getString(sr + ".mat").equalsIgnoreCase("null")) {
                 datas[1] = ShopListeners.frameshop.getShopConfig().getString(sr + ".mat");
@@ -69,7 +70,15 @@ public class ShopData {
             datai[4] = ShopListeners.frameshop.getShopConfig().getInt(sr + ".type");
             datad = new double[1];
             datad[0] = ShopListeners.frameshop.getShopConfig().getDouble(sr + ".cost");
-
+            if(ShopListeners.frameshop.getShopConfig().getString(sr+".name") != null && !ShopListeners.frameshop.getShopConfig().getString(sr+".name").equalsIgnoreCase("null"))
+            {
+                datas[2] = ShopListeners.frameshop.getShopConfig().getString(sr + ".name");
+            }
+            else
+            {
+                datas[2] = null;
+            }    
+            
             if (ShopListeners.frameshop.getShopConfig().getString(sr + ".inv") != null) {
                 si = Serializer.fromBase64(ShopListeners.frameshop.getShopConfig().getString(sr + ".inv"));
             } else {
@@ -119,7 +128,7 @@ public class ShopData {
                 for (MapRenderer mr : mv.getRenderers()) {
                     mv.removeRenderer(mr);
                 }
-                mv.addRenderer(new Renderer(pl, true, datas[1], datad[0], datai[2], datas[0], datai[4], datai[1], datai[3], imsd));
+                mv.addRenderer(new Renderer(pl, true, datas[1], datad[0], datai[2], datas[0], datai[4], datai[1], datai[3], imsd, datas[2]));
                 m.setDurability(mv.getId());
                 ((ItemFrame) sd).setItem(m);
                 map = mv;
@@ -181,14 +190,16 @@ public class ShopData {
                     + "`amount`=" + datai[2] + ", "
                     + "`data`=" + datai[3] + ", "
                     + "`type`=" + datai[4] + ", "
-                    + "`enchantments`=" + imsd
+                    + "`enchantments`=" + imsd + ", "
+                    + "`name`=" + datas[2]
                     + " WHERE loc='" + Serializer.serializeLoc(sl) + "'";
             Database.db.query(query, true);
         } else {
             String sr = Serializer.serializeLoc(sl).replaceAll("\\.", "@");
             String[] pictures = {"owner:" + datas[0],
                 "mat:" + datas[1],
-                "inv:" + Serializer.toBase64(si)
+                "inv:" + Serializer.toBase64(si),
+                "name:" + datas[2]
             };
             String[] ints = {
                 "idd:" + datai[1],

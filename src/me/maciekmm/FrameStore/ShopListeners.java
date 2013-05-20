@@ -61,7 +61,7 @@ public class ShopListeners implements Listener {
             for (MapRenderer mr : mv.getRenderers()) {
                 mv.removeRenderer(mr);
             }
-            mv.addRenderer(new Renderer(frameshop, true, null, 0, 0, e.getPlayer().getName(), 0, 0, 0, null));
+            mv.addRenderer(new Renderer(frameshop, true, null, 0, 0, e.getPlayer().getName(), 0, 0, 0, null, null));
             m.setDurability(mv.getId());
             enn.setItem(m);
         } else if (p.getItemInHand().getItemMeta().hasLore() && !p.hasPermission("frameshop.create")) {
@@ -155,6 +155,7 @@ public class ShopListeners implements Listener {
                             sd.setData(1, iih.getType().name().toLowerCase());
                             sd.setData(1, (int) iih.getTypeId());
                             sd.setData(3, (int) iih.getData().getData());
+                            sd.setData(2, iih.getItemMeta().getDisplayName());
                             sd.setEnch(iih.getItemMeta().getEnchants());
                             sd.reRender(frameshop);
                         } else if (sd.getIntData(4) == 0 && sd.getStringData(1) != null) {
@@ -360,8 +361,14 @@ public class ShopListeners implements Listener {
     }
 
     @EventHandler
-    public void onPlayerSpawn(PlayerJoinEvent e) { //Post Login Event, when sending maps in login event player(entity) was not spawned
-        ShopListeners.functions.sendMaps(e.getPlayer());
+    public void onPlayerSpawn(final PlayerJoinEvent e) { //Post Login Event, when sending maps in login event player(entity) was not spawned
+        frameshop.getServer().getScheduler().runTaskAsynchronously(frameshop, new Runnable() {
+            @Override
+            public void run() {
+                ShopListeners.functions.sendMaps(e.getPlayer());
+            }
+        });
+
 
     }
 }

@@ -27,10 +27,10 @@ public class Renderer extends MapRenderer {
     double cost;
     int amount, idd, data, type;
     Image i;
-    String name, seller;
+    String name, seller, cname;
     Map<Enchantment, Integer> imsd;
 
-    public Renderer(FrameStore plg, boolean rn, String name, double cost, int amount, String seller, int type, int idd, int data, Map<Enchantment, Integer> imsd) {
+    public Renderer(FrameStore plg, boolean rn, String name, double cost, int amount, String seller, int type, int idd, int data, Map<Enchantment, Integer> imsd, String cname) {
         super(true);
         this.plg = plg;
 
@@ -50,6 +50,7 @@ public class Renderer extends MapRenderer {
         this.amount = amount;
         this.type = type;
         this.cost = cost;
+        this.cname = cname;
         this.idd = idd;
         this.data = data;
         this.imsd = imsd;
@@ -78,8 +79,12 @@ public class Renderer extends MapRenderer {
             canvas.drawText(10, fh, MinecraftFont.Font, plg.getMessage("mapmessages.types.notconf"));
         }
 
-
-        if (name == null) {
+        
+        if (cname!=null) {
+            name = cname;
+        }
+        else if(name == null && cname == null)
+        {
             name = plg.getMessage("mapmessages.misc.noitem");
         }
         canvas.drawText(6, 2 * fh + 11, MinecraftFont.Font, name);
