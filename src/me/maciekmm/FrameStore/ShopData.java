@@ -45,8 +45,9 @@ public class ShopData {
                 datai[2] = rs.getInt("amount");
                 datai[3] = rs.getInt("data");
                 datai[4] = rs.getInt("type");
-                datad = new double[1];
+                datad = new double[2];
                 datad[0] = rs.getDouble("cost");
+                datad[1] = rs.getDouble("costs");
                 si = Serializer.fromBase64(rs.getString("inv"));
                 sl = Serializer.unserializeLoc(rs.getString("loc"));
                 imsd = Serializer.toItemMeta(rs.getString("enchantments"));
@@ -68,8 +69,9 @@ public class ShopData {
             datai[2] = ShopListeners.frameshop.getShopConfig().getInt(sr + ".amount");
             datai[3] = ShopListeners.frameshop.getShopConfig().getInt(sr + ".data");
             datai[4] = ShopListeners.frameshop.getShopConfig().getInt(sr + ".type");
-            datad = new double[1];
+            datad = new double[2];
             datad[0] = ShopListeners.frameshop.getShopConfig().getDouble(sr + ".cost");
+            datad[1] = ShopListeners.frameshop.getShopConfig().getDouble(sr + ".costs");
             if(ShopListeners.frameshop.getShopConfig().getString(sr+".name") != null && !ShopListeners.frameshop.getShopConfig().getString(sr+".name").equalsIgnoreCase("null"))
             {
                 datas[2] = ShopListeners.frameshop.getShopConfig().getString(sr + ".name");
@@ -128,7 +130,7 @@ public class ShopData {
                 for (MapRenderer mr : mv.getRenderers()) {
                     mv.removeRenderer(mr);
                 }
-                mv.addRenderer(new Renderer(pl, true, datas[1], datad[0], datai[2], datas[0], datai[4], datai[1], datai[3], imsd, datas[2]));
+                mv.addRenderer(new Renderer(pl, true, datas[1], datad[0], datai[2], datas[0], datai[4], datai[1], datai[3], imsd, datas[2], datad[1]));
                 m.setDurability(mv.getId());
                 ((ItemFrame) sd).setItem(m);
                 map = mv;
@@ -191,7 +193,8 @@ public class ShopData {
                     + "`data`=" + datai[3] + ", "
                     + "`type`=" + datai[4] + ", "
                     + "`enchantments`=" + imsd + ", "
-                    + "`name`=" + datas[2]
+                    + "`name`=" + datas[2] + ", "
+                    + "`costs`=" +datad[1]
                     + " WHERE loc='" + Serializer.serializeLoc(sl) + "'";
             Database.db.query(query, true);
         } else {
@@ -208,7 +211,7 @@ public class ShopData {
                 "type:" + datai[4]
             };
             if (imsd != null && !imsd.isEmpty()) {
-                pictures[pictures.length] = "enchantments:" + Serializer.serializeEnch(imsd);
+                pictures[pictures.length-1] = "enchantments:" + Serializer.serializeEnch(imsd);
             }
             for (String value : Arrays.asList(pictures)) {
                 String[] s = value.split(":");
@@ -219,6 +222,7 @@ public class ShopData {
                 ShopListeners.frameshop.getShopConfig().set(sr + "." + s[0], Integer.parseInt(s[1]));
             }
             ShopListeners.frameshop.getShopConfig().set(sr + "." + "cost", datad[0]);
+            ShopListeners.frameshop.getShopConfig().set(sr + "." + "costs", datad[1]);
             ShopListeners.frameshop.saveShopConfig();
         }
     }

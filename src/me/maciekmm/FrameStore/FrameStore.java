@@ -1,8 +1,11 @@
 package me.maciekmm.FrameStore;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.channels.Channels;
@@ -40,6 +43,7 @@ public class FrameStore extends JavaPlugin {
     private File shopConfigFile = null;
     private List<String> lores = new ArrayList<>();
     private ItemStack is;
+    public static boolean update = false;
 
     @Override
     public void onEnable() {
@@ -72,10 +76,41 @@ public class FrameStore extends JavaPlugin {
                 log.info("Dumping data to database");
             }
         }, 20000L, 40000L);
-        if (!new File(this.getDataFolder() + File.separator + "textures" + File.separator + "minecraft.jar").exists() && this.getConfig().getBoolean("downloadimages")) {
+        if (this.getConfig().getBoolean("updatenotifications")) {
+            
+            try {
+                FileOutputStream fos = null;
+                URL website = new URL("http://maciekmm.tk/framestore/ver.txt");
+                ReadableByteChannel rbc = Channels.newChannel(website.openStream());
+                fos = new FileOutputStream(ShopListeners.frameshop.getDataFolder() + File.separator + "ver.txt");
+                fos.getChannel().transferFrom(rbc, 0, 1 << 24);
+                try {
+                    BufferedReader br = new BufferedReader(new FileReader(ShopListeners.frameshop.getDataFolder() + File.separator + "ver.txt"));
+                    String s = null;
+                    while ((s = br.readLine()) != null && (s = s.trim()).length() > 0) {
+                        String f[] = s.split("\t");
+                        if (!this.getDescription().getVersion().equals(s)) {
+
+                            update = true;
+                        }
+                    }
+                    br.close();
+                    new File(ShopListeners.frameshop.getDataFolder() + File.separator + "ver.txt").deleteOnExit();
+                } catch (FileNotFoundException ex) {
+                    log.log(Level.SEVERE, null, ex);
+                }
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(FrameStore.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(FrameStore.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+
+}
+if (!new File(this.getDataFolder() + File.separator + "textures" + File.separator + "minecraft.jar").exists() && this.getConfig().getBoolean("downloadimages")) {
             this.getServer().getScheduler().runTaskAsynchronously(this, new Runnable() {
                 @Override
-                public void run() {
+        public void run() {
                     byte[] buffer = new byte[1024];
                     FileOutputStream fos = null;
                     try {
@@ -110,30 +145,43 @@ public class FrameStore extends JavaPlugin {
                                 ze = zis.getNextEntry();
                             } else {
                                 ze = zis.getNextEntry();
-                            }
+                            
+
+}
                         }
 
                     } catch (IOException | InterruptedException ex) {
-                        Logger.getLogger(FrameStore.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(FrameStore.class  
+
+.getName()).log(Level.SEVERE, null, ex);
 
                     } finally {
                         try {
                             if (fos != null) {
                                 fos.close();
-                            }
+                            
+
+}
 
                         } catch (IOException ex) {
-                            Logger.getLogger(FrameStore.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(FrameStore.class  
+
+.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
                 }
             });
         }
-
+        try {
+            MetricsLite metrics = new MetricsLite(this);
+            metrics.start();
+        } catch (IOException e) {
+            log.log(Level.INFO, "Failed to load metrics");
+        }
     }
 
     @Override
-    public void onDisable() {
+        public void onDisable() {
         saver.cancel();
         this.saveConfig();
         saveShopConfig();
@@ -142,7 +190,7 @@ public class FrameStore extends JavaPlugin {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (label.equalsIgnoreCase("fs")) {
             if (args.length > 0) {
                 if (args[0].equalsIgnoreCase("reload") && sender.hasPermission("framestore.admin")) {
@@ -461,13 +509,19 @@ public class FrameStore extends JavaPlugin {
         String[] mapmessages = {
             "types.buy@§28;Buy (Right click to buy)",
             "types.sell@§16;Sell (Right click to sell)",
+            "types.both.buy@§28;RMB to Buy",
+            "types.both.sell@§28;LMB to Sell",
             "types.adminshop.buy.glob@§28;AdminShop Buy",
             "types.adminshop.buy.desc@§20;Right click to buy",
             "types.adminshop.sell.glob@§16;AdminShop Sell",
             "types.adminshop.sell.desc@§10;Right click to sell",
+            "types.adminshop.both.buy@§28;(AS) RMB to Buy",
+            "types.adminshop.both.sell@§28;(AS) LMB to Sell",
             "types.notconf@§16;Not configurated",
             "misc.noitem@Empty Shop",
             "misc.cost@Cost: §28;",
+            "misc.costbuy@Buycost: §28;",
+            "misc.costsell@Sellcost: §28;",
             "misc.amount@Amount: §28;",
             "misc.id@Id: ",
             "misc.enchantments@Enchantments:",
@@ -485,21 +539,26 @@ public class FrameStore extends JavaPlugin {
             "interacting.errors.notconfigured@Shop is not configured.",
             "interacting.puttingmapinside@You can't put map in itemframe!",
             "creating.global.created@You successfully created empty shop. Now click with item on frame.",
-            "creating.global.settingtype@What type should it be (Shop-1, Sell-2):",
+            "creating.global.settingtype@What type should it be(type in chat) (Buy-1, Sell-2, Sell/Buy-5):",
             "creating.global.settingamount@Type what amount you'd like to sell or buy:",
             "creating.global.settingcost@Now set the cost:",
+            "creating.global.settingbuycost@Now set buy cost:",
+            "creating.global.settingsellcost@Now set sell cost:",
             "creating.global.settingitem@Set the item type.",
             "creating.global.passsettingtype@You have successfully set shop type.",
-            "creating.global.passsettingamount@You have successfully set sell amount.",
-            "creating.global.passsettingcost@You have successfully set sell cost.",
+            "creating.global.passsettingamount@You have successfully set amount.",
+            "creating.global.passsettingbuycost@You have successfully set buy cost.",
+            "creating.global.passsettingsellcost@You have successfully set sell cost.",
+            "creating.global.passsettingcost@You have successfully set cost.",
             "creating.global.passsettingitem@Set the item type.",
-            "creating.global.admin.settingtype@Shop is 1, Purchase is 2, AdminShop shop is 3, AdminShop sell is 4",
+            "creating.global.admin.settingtype@Type in chat what type would you like:\n Shop is 1,\n Sell is 2,\n AdminShop shop is 3,\n AdminShop sell is 4,\n Buy/Sell is 5 \n Buy/Sell AdminShop is 6",
             "creating.errors.invalidcost@Cost must be greater than 0",
             "creating.errors.othershopoverlaying@You cannot place shop here, other shop is here!",
             "creating.errors.permdenied@You are not permitted to create shops!",
             "destroying.errors.notanowner@You are not a shop owner!",
             "destroying.success@Successfully removed shop."};
         this.getConfig().addDefault("downloadimages", true);
+        this.getConfig().addDefault("updatenotifications", true);
         this.getConfig().addDefault("map.drawowner", true);
         this.getConfig().addDefault("map.drawid", true);
         for (String value : Arrays.asList(mapmessages)) {
@@ -547,13 +606,21 @@ public class FrameStore extends JavaPlugin {
     private boolean setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
             return false;
-        }
-        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
-        if (rsp == null) {
+        
+
+}
+        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class  
+
+    );
+        if (rsp
+
+    
+        == null) {
             return false;
-        }
-        econ = rsp.getProvider();
-        return econ != null;
+    }
+    econ  = rsp.getProvider();
+    return econ 
+!= null;
     }
 
     public ItemStack getFrameItem() {

@@ -112,7 +112,7 @@ public class ShopFunctions {
             if (invStack.getTypeId() == costd.getTypeId()) {
                 int inv = invStack.getAmount();
                 int cost = costd.getAmount();
-                if (cost - inv >= 0) {
+                if (cost - inv >= 1) {
                     costd.setAmount(cost - inv);
                     inve.remove(invStack);
                 } else {
