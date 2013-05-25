@@ -22,6 +22,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.map.MapRenderer;
 import org.bukkit.map.MapView;
 
@@ -107,7 +108,7 @@ public class ShopListeners implements Listener {
                                     functions.consumeItems(remo.getInventory(), con);
                                     String success = frameshop.getMessage("confmessages.interacting.selling.success").replaceAll("%amount%", String.valueOf(sd.getIntData(2))).replaceAll("%name%", sd.getStringData(1));
                                     remo.sendMessage(ChatColor.DARK_GREEN + success);
-                                    sd.getInv().addItem(con);
+                                    //sd.getInv().addItem(con);
                                 } else if (!functions.checkItems(remo.getInventory(), new ItemStack(sd.getIntData(1), sd.getIntData(2)))) {
                                     remo.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.selling.errors.noitems"));
                                 } else {
@@ -127,7 +128,7 @@ public class ShopListeners implements Listener {
                                 }
                             }
                             functions.getshopl().remove(isf.getLocation());
-                            if (e.getRemover() instanceof Player && ((Player) e.getRemover()).getName().equalsIgnoreCase(sd.getStringData(0))) {
+                            if (e.getRemover() instanceof Player && (((Player) e.getRemover()).getName().equalsIgnoreCase(sd.getStringData(0))||((Player)e.getRemover()).isOp())) {
                                 ((Player) e.getRemover()).sendMessage(ChatColor.DARK_GREEN + frameshop.getMessage("confmessages.destroying.success"));
                                 isf.getLocation().getWorld().dropItem(isf.getLocation(), frameshop.getFrameItem());
                                 e.getEntity().remove();
@@ -273,6 +274,12 @@ public class ShopListeners implements Listener {
 
                                     Serializer.addEnchantments(con, sd.getEnch());
                                 }
+                                if(sd.getStringData(2)!=null&&!sd.getStringData(2).equalsIgnoreCase("null"))
+                                {
+                                    ItemMeta im = con.getItemMeta();
+                                    im.setDisplayName(sd.getStringData(2));
+                                    con.setItemMeta(im);
+                                }
                                 if (p.getInventory().firstEmpty() == -1) {
                                     p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.buying.errors.notenoughspace"));
                                     return;
@@ -299,7 +306,7 @@ public class ShopListeners implements Listener {
                                 functions.consumeItems(p.getInventory(), con);
                                 String success = frameshop.getMessage("confmessages.interacting.selling.success").replaceAll("%amount%", String.valueOf(sd.getIntData(2))).replaceAll("%name%", sd.getStringData(1));
                                 p.sendMessage(ChatColor.DARK_GREEN + success);
-                                sd.getInv().addItem(con);
+                                //sd.getInv().addItem(con);
                             } else if (!functions.checkItems(e.getPlayer().getInventory(), new ItemStack(sd.getIntData(1), sd.getIntData(2)))) {
                                 p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.selling.errors.noitems"));
                             } else {
