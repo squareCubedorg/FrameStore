@@ -105,58 +105,9 @@ public class ShopFunctions {
     }
 
     public void consumeItems(Inventory inve, ItemStack costStack) {
-       // ItemStack costd = costStack.clone();
         inve.removeItem(costStack);
-        /*for (ItemStack invStack : inve.getContents()) {
-            if (invStack == null) {
-                continue;
-            }
 
-            if (invStack.getTypeId() == costd.getTypeId()) {
-                int inv = invStack.getAmount();
-                int cost = costd.getAmount();
-                if (cost - inv >= 0) {
-                    costd.setAmount(cost - inv);
-                    inve.remove(invStack);
-                } else {
-                    costd.setAmount(0);
-                    invStack.setAmount(inv - cost);
-                    break;
-                }
-            }
-        }*/
     }
-    /*public boolean consumeItems(Inventory pi, ItemStack is){
-        Material m = is.getType();
-        int szt = is.getAmount();
-        int ma_szt = 0;
-        for(ItemStack item:pi){
-            
-            if(item.getType() == m){
-                ma_szt+=item.getAmount();
-            }
-            if(ma_szt>=szt)break;
-        }
-        if(ma_szt<szt) 
-            return false;
-        
-        for(ItemStack item:pi){
-            
-            if(item.getType() == m){
-                if(item.getAmount()>szt){
-                    item.setAmount(item.getAmount()-szt);
-                } else if(item.getAmount()<=szt){
-                    szt -= szt;
-                    item.setTypeId(0);
-                }
-            }
-            if(szt==0)
-                break;
-        }
-        return true;
-        
-    }
-*/
     public HashMap<String, ArrayList<Object>> getShopSet() {
         return shopset;
     }
