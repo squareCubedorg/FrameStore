@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,6 +52,8 @@ public class ShopData {
                 si = Serializer.fromBase64(rs.getString("inv"));
                 sl = Serializer.unserializeLoc(rs.getString("loc"));
                 imsd = Serializer.toItemMeta(rs.getString("enchantments"));
+                String[] ss = rs.getString("lore").split("^$");
+                ls = Arrays.asList(ss);
 
             } catch (SQLException ex) {
                 Logger.getLogger(ShopData.class.getName()).log(Level.SEVERE, null, ex);
@@ -72,15 +75,11 @@ public class ShopData {
             datad = new double[2];
             datad[0] = ShopListeners.frameshop.getShopConfig().getDouble(sr + ".cost");
             datad[1] = ShopListeners.frameshop.getShopConfig().getDouble(sr + ".costs");
-            if(ShopListeners.frameshop.getShopConfig().getString(sr+".name") != null && !ShopListeners.frameshop.getShopConfig().getString(sr+".name").equalsIgnoreCase("null"))
-            {
+            if (ShopListeners.frameshop.getShopConfig().getString(sr + ".name") != null && !ShopListeners.frameshop.getShopConfig().getString(sr + ".name").equalsIgnoreCase("null")) {
                 datas[2] = ShopListeners.frameshop.getShopConfig().getString(sr + ".name");
-            }
-            else
-            {
+            } else {
                 datas[2] = null;
-            }    
-            
+            }
             if (ShopListeners.frameshop.getShopConfig().getString(sr + ".inv") != null) {
                 si = Serializer.fromBase64(ShopListeners.frameshop.getShopConfig().getString(sr + ".inv"));
             } else {
@@ -92,6 +91,7 @@ public class ShopData {
                 imsd = null;
             }
             sl = Serializer.unserializeLoc(s);
+            ls = ShopListeners.frameshop.getShopConfig().getStringList(sr + ".lore");
             ShopListeners.frameshop.saveShopConfig();
         }
     }
@@ -156,7 +156,9 @@ public class ShopData {
     public Inventory getInv() {
         return si;
     }
-
+    public List<String> getLores() {
+        return ls;
+    }
     public void setData(int nr, String content) {
         datas[nr] = content;
     }
@@ -171,6 +173,10 @@ public class ShopData {
 
     public void setEnch(Map<Enchantment, Integer> m) {
         imsd = m;
+    }
+    public void setLores(List<String> s)
+    {
+        ls = s;
     }
 
     public Map<Enchantment, Integer> getEnch() {
@@ -193,8 +199,9 @@ public class ShopData {
                     + "`data`=" + datai[3] + ", "
                     + "`type`=" + datai[4] + ", "
                     + "`enchantments`=" + imsd + ", "
-                    + "`name`=" + datas[2] + ", "
-                    + "`costs`=" +datad[1]
+                    + "`name`=" + ShopListeners.functions.nullFixer("'" + datas[2] + "'") + ", "
+                    + "`lore`=" + ShopListeners.functions.nullFixer("'" + Serializer.serializeLore(ls) + "'") + ", "
+                    + "`costs`=" + datad[1]
                     + " WHERE loc='" + Serializer.serializeLoc(sl) + "'";
             Database.db.query(query, true);
         } else {
@@ -202,7 +209,7 @@ public class ShopData {
             String[] pictures = {"owner:" + datas[0],
                 "mat:" + datas[1],
                 "inv:" + Serializer.toBase64(si),
-                "name:" + datas[2]
+                "name:" + datas[2],
             };
             String[] ints = {
                 "idd:" + datai[1],
@@ -211,7 +218,7 @@ public class ShopData {
                 "type:" + datai[4]
             };
             if (imsd != null && !imsd.isEmpty()) {
-                pictures[pictures.length-1] = "enchantments:" + Serializer.serializeEnch(imsd);
+                pictures[pictures.length - 1] = "enchantments:" + Serializer.serializeEnch(imsd);
             }
             for (String value : Arrays.asList(pictures)) {
                 String[] s = value.split(":");
@@ -221,8 +228,9 @@ public class ShopData {
                 String[] s = value.split(":");
                 ShopListeners.frameshop.getShopConfig().set(sr + "." + s[0], Integer.parseInt(s[1]));
             }
-            ShopListeners.frameshop.getShopConfig().set(sr + "." + "cost", datad[0]);
-            ShopListeners.frameshop.getShopConfig().set(sr + "." + "costs", datad[1]);
+            ShopListeners.frameshop.getShopConfig().set(sr + ".lore", ls);
+            ShopListeners.frameshop.getShopConfig().set(sr + ".cost", datad[0]);
+            ShopListeners.frameshop.getShopConfig().set(sr + ".costs", datad[1]);
             ShopListeners.frameshop.saveShopConfig();
         }
     }
@@ -247,5 +255,6 @@ public class ShopData {
     private Inventory si;
     private Location sl;
     private MapView map;
+    private List<String> ls;
     private Map<Enchantment, Integer> imsd;
 }

@@ -6,6 +6,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import net.minecraft.server.v1_5_R3.NBTBase;
@@ -118,7 +119,21 @@ public class Serializer {
             return null;
         }
     }
-
+    public static String serializeLore(List<String> ls) {
+        if(ls==null||ls.isEmpty())
+        {
+            return null;
+        }
+        else
+        {
+            StringBuilder sb = new StringBuilder();
+            for (String s : ls)
+            {
+                sb.append(s).append("^$");
+            }
+            return sb.toString();
+        }
+    }
     public static Map<Enchantment, Integer> toItemMeta(String s) {
         if (s != null && !s.equalsIgnoreCase("null")) {
             Map<Enchantment, Integer> em = new HashMap<>();

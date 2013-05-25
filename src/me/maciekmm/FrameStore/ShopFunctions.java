@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_5_R3.inventory.CraftInventory;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -103,8 +105,9 @@ public class ShopFunctions {
     }
 
     public void consumeItems(Inventory inve, ItemStack costStack) {
-        ItemStack costd = costStack.clone();
-        for (ItemStack invStack : inve.getContents()) {
+       // ItemStack costd = costStack.clone();
+        inve.removeItem(costStack);
+        /*for (ItemStack invStack : inve.getContents()) {
             if (invStack == null) {
                 continue;
             }
@@ -121,9 +124,39 @@ public class ShopFunctions {
                     break;
                 }
             }
-        }
+        }*/
     }
-
+    /*public boolean consumeItems(Inventory pi, ItemStack is){
+        Material m = is.getType();
+        int szt = is.getAmount();
+        int ma_szt = 0;
+        for(ItemStack item:pi){
+            
+            if(item.getType() == m){
+                ma_szt+=item.getAmount();
+            }
+            if(ma_szt>=szt)break;
+        }
+        if(ma_szt<szt) 
+            return false;
+        
+        for(ItemStack item:pi){
+            
+            if(item.getType() == m){
+                if(item.getAmount()>szt){
+                    item.setAmount(item.getAmount()-szt);
+                } else if(item.getAmount()<=szt){
+                    szt -= szt;
+                    item.setTypeId(0);
+                }
+            }
+            if(szt==0)
+                break;
+        }
+        return true;
+        
+    }
+*/
     public HashMap<String, ArrayList<Object>> getShopSet() {
         return shopset;
     }

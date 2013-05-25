@@ -44,9 +44,12 @@ public class Renderer extends MapRenderer {
         }
         redrawneeded = rn;
         //this.stock = stock;
-        if (cname != null && !cname.equalsIgnoreCase("null")) {
+        if (cname != null && !cname.equalsIgnoreCase("null") && cname.length()<6) {
             this.name = cname;
-        } else {
+        } else if(cname != null && !cname.equalsIgnoreCase("null")) {
+            this.name = "Custom " + name;
+        } 
+        else {
             this.name = name;
         }
         this.seller = seller;

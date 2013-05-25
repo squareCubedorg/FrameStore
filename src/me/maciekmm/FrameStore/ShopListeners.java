@@ -193,6 +193,9 @@ public class ShopListeners implements Listener {
                             if (iih.getItemMeta().getDisplayName() != null) {
                                 sd.setData(2, iih.getItemMeta().getDisplayName());
                             }
+                            if(iih.getItemMeta().getLore() !=null) {
+                                sd.setLores(iih.getItemMeta().getLore());
+                            }
                             sd.setEnch(iih.getItemMeta().getEnchants());
                             sd.reRender(frameshop);
                         } else if (sd.getIntData(4) == 0 && sd.getStringData(1) != null) {
@@ -273,6 +276,12 @@ public class ShopListeners implements Listener {
                                 if (sd.getEnch() != null && !sd.getEnch().isEmpty()) {
 
                                     Serializer.addEnchantments(con, sd.getEnch());
+                                }
+                                if (sd.getLores() !=null && !sd.getLores().isEmpty())
+                                {
+                                    ItemMeta im = con.getItemMeta();
+                                    im.setLore(sd.getLores());
+                                    con.setItemMeta(im);
                                 }
                                 if(sd.getStringData(2)!=null&&!sd.getStringData(2).equalsIgnoreCase("null"))
                                 {
