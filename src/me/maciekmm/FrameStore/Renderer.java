@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import javax.imageio.ImageIO;
-import me.maciekmm.FrameStore.FrameStore;
 import org.bukkit.Bukkit;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -45,12 +44,15 @@ public class Renderer extends MapRenderer {
         }
         redrawneeded = rn;
         //this.stock = stock;
+        if (cname != null && !cname.equalsIgnoreCase("null")) {
+            this.name = cname;
+        } else {
+            this.name = name;
+        }
         this.seller = seller;
-        this.name = name;
         this.amount = amount;
         this.type = type;
         this.cost = cost;
-        this.cname = cname;
         this.idd = idd;
         this.data = data;
         this.imsd = imsd;
@@ -85,23 +87,16 @@ public class Renderer extends MapRenderer {
         } else {
             canvas.drawText(7, fh, MinecraftFont.Font, plg.getMessage("mapmessages.types.notconf"));
         }
+        if(name!=null)
+        {
+            String nn = name.replaceAll("§", " ");
+            canvas.drawText(6, 2 * fh + 11, MinecraftFont.Font, nn);
+        }
 
-        
-        if (cname!=null&&!cname.equalsIgnoreCase("null")) {
-            name = cname;
-        }
-        else if((cname==null||cname.equalsIgnoreCase("null"))&&name==null)
-        {
-            name = plg.getMessage("mapmessages.misc.noitem");
-        }
-        canvas.drawText(6, 2 * fh + 11, MinecraftFont.Font, name);
-        if (type == 5 || type ==6)
-        {
-            canvas.drawText(6, 3 * fh + 11, MinecraftFont.Font, plg.getMessage("mapmessages.misc.costbuy") +cost);
-            canvas.drawText(6, 4 * fh + 11, MinecraftFont.Font, plg.getMessage("mapmessages.misc.costsell") +costs);
-        }
-        else
-        {
+        if (type == 5 || type == 6) {
+            canvas.drawText(6, 3 * fh + 11, MinecraftFont.Font, plg.getMessage("mapmessages.misc.costbuy") + cost);
+            canvas.drawText(6, 4 * fh + 11, MinecraftFont.Font, plg.getMessage("mapmessages.misc.costsell") + costs);
+        } else {
             canvas.drawText(6, 3 * fh + 11, MinecraftFont.Font, plg.getMessage("mapmessages.misc.cost") + cost);
         }
         canvas.drawText(6, 5 * fh + 11, MinecraftFont.Font, plg.getMessage("mapmessages.misc.amount") + amount);
@@ -121,7 +116,7 @@ public class Renderer extends MapRenderer {
         if (seller != null && (type == 1 || type == 2 || type == 5) && plg.getConfig().getBoolean("map.drawowner")) {
             canvas.drawText(6, 125 - fh, MinecraftFont.Font, plg.getMessage("mapmessages.misc.owner") + seller);
         }
-                if (redrawneeded) {
+        if (redrawneeded) {
             redrawneeded = false;
             for (Player pm : Bukkit.getOnlinePlayers()) {
                 pm.sendMap(map);
