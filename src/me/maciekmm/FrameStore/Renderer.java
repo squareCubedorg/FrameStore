@@ -60,7 +60,12 @@ public class Renderer extends MapRenderer {
 
     @Override
     public void render(MapView map, MapCanvas canvas, Player p) {
-
+        if (redrawneeded) {
+            redrawneeded = false;
+            for (Player pm : Bukkit.getOnlinePlayers()) {
+                pm.sendMap(map);
+            }
+        }
         int fh = MinecraftFont.Font.getHeight();
         if (i != null) {
             canvas.drawImage(78, fh + 10, i.getScaledInstance(50, 50, Image.SCALE_DEFAULT));
@@ -90,7 +95,7 @@ public class Renderer extends MapRenderer {
         if (cname!=null&&!cname.equalsIgnoreCase("null")) {
             name = cname;
         }
-        else if(cname==null&&name==null)
+        else if((cname==null||cname.equalsIgnoreCase("null"))&&name==null)
         {
             name = plg.getMessage("mapmessages.misc.noitem");
         }
@@ -121,13 +126,6 @@ public class Renderer extends MapRenderer {
         if (seller != null && (type == 1 || type == 2 || type == 5) && plg.getConfig().getBoolean("map.drawowner")) {
             canvas.drawText(6, 125 - fh, MinecraftFont.Font, plg.getMessage("mapmessages.misc.owner") + seller);
         }
-        if (redrawneeded) {
-            redrawneeded = false;
-            for (Player pm : Bukkit.getOnlinePlayers()) {
-                pm.sendMap(map);
-            }
 
-
-        }
     }
 }

@@ -224,13 +224,13 @@ public class ShopListeners implements Listener {
                             if (sd.getInv() != null && sd.getIntData(4) != 0 && sd.getIntData(1) != 0 && sd.getIntData(2) != 0 && functions.checkItems(sd.getInv(), new ItemStack(sd.getIntData(1), sd.getIntData(2)))) {
                                 ItemStack con = new ItemStack(sd.getIntData(1), sd.getIntData(2), (byte) sd.getIntData(3));
                                 if (sd.getEnch() != null && !sd.getEnch().isEmpty()) {
-                                    if (sd.getInv().getItem(sd.getInv().first(new ItemStack(sd.getIntData(1), sd.getIntData(2)))).getEnchantments() == sd.getEnch()) {
+                                    if (sd.getInv().getItem(sd.getInv().first(new ItemStack(sd.getIntData(1), sd.getIntData(2)))).getEnchantments() != sd.getEnch()) {
                                         p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.buying.errors.noitems"));
                                         return;
                                     }
                                     Serializer.addEnchantments(con, sd.getEnch());
                                 }
-
+                                con.setItemMeta(sd.getInv().getItem(sd.getInv().first(con.getType())).getItemMeta());
                                 if (p.getInventory().firstEmpty() == -1) {
                                     p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.buying.errors.notenoughspace"));
                                     return;
