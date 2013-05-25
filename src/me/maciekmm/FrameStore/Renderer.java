@@ -89,7 +89,7 @@ public class Renderer extends MapRenderer {
         }
         if(name!=null)
         {
-            String nn = name.replaceAll("§", " ");
+            String nn = name.replaceAll("§([1-9])", " ");
             canvas.drawText(6, 2 * fh + 11, MinecraftFont.Font, nn);
         }
 
