@@ -36,8 +36,8 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 public class FrameStore extends JavaPlugin {
 
     private BukkitTask saver;
-    public final static Logger log = Bukkit.getLogger();
     public static Economy econ = null;
+    public final static Logger log = Bukkit.getLogger();
     public static String type;
     private FileConfiguration shopConfig = null;
     private File shopConfigFile = null;
@@ -77,7 +77,7 @@ public class FrameStore extends JavaPlugin {
             }
         }, 20000L, 40000L);
         if (this.getConfig().getBoolean("updatenotifications")) {
-            
+
             try {
                 FileOutputStream fos = null;
                 URL website = new URL("http://maciekmm.tk/framestore/ver.txt");
@@ -104,13 +104,13 @@ public class FrameStore extends JavaPlugin {
             } catch (IOException ex) {
                 Logger.getLogger(FrameStore.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
 
-}
-if (!new File(this.getDataFolder() + File.separator + "textures" + File.separator + "minecraft.jar").exists() && this.getConfig().getBoolean("downloadimages")) {
+
+        }
+        if (!new File(this.getDataFolder() + File.separator + "textures" + File.separator + "minecraft.jar").exists() && this.getConfig().getBoolean("downloadimages")) {
             this.getServer().getScheduler().runTaskAsynchronously(this, new Runnable() {
                 @Override
-        public void run() {
+                public void run() {
                     byte[] buffer = new byte[1024];
                     FileOutputStream fos = null;
                     try {
@@ -145,28 +145,26 @@ if (!new File(this.getDataFolder() + File.separator + "textures" + File.separato
                                 ze = zis.getNextEntry();
                             } else {
                                 ze = zis.getNextEntry();
-                            
 
-}
+
+                            }
                         }
 
                     } catch (IOException | InterruptedException ex) {
-                        Logger.getLogger(FrameStore.class  
-
-.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(FrameStore.class
+                                .getName()).log(Level.SEVERE, null, ex);
 
                     } finally {
                         try {
                             if (fos != null) {
                                 fos.close();
-                            
 
-}
+
+                            }
 
                         } catch (IOException ex) {
-                            Logger.getLogger(FrameStore.class  
-
-.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(FrameStore.class
+                                    .getName()).log(Level.SEVERE, null, ex);
                         }
                     }
                 }
@@ -181,16 +179,15 @@ if (!new File(this.getDataFolder() + File.separator + "textures" + File.separato
     }
 
     @Override
-        public void onDisable() {
+    public void onDisable() {
         saver.cancel();
         this.saveConfig();
         saveShopConfig();
         ShopListeners.functions.clearer();
-        Database.db = null;
     }
 
     @Override
-        public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (label.equalsIgnoreCase("fs")) {
             if (args.length > 0) {
                 if (args[0].equalsIgnoreCase("reload") && sender.hasPermission("framestore.admin")) {
@@ -603,28 +600,24 @@ if (!new File(this.getDataFolder() + File.separator + "textures" + File.separato
         }
     }
 
+    public ItemStack getFrameItem() {
+        return is;
+    }
+
     private boolean setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
             return false;
-        
 
-}
-        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class  
 
-    );
+        }
+        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
         if (rsp
-
-    
-        == null) {
+                == null) {
             return false;
-    }
-    econ  = rsp.getProvider();
-    return econ 
-!= null;
-    }
-
-    public ItemStack getFrameItem() {
-        return is;
+        }
+        econ = rsp.getProvider();
+        return econ
+                != null;
     }
 
     public String getMessage(String s) {

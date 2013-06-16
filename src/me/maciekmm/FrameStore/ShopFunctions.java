@@ -5,8 +5,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_5_R3.inventory.CraftInventory;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -43,6 +41,9 @@ public class ShopFunctions {
             }
         }
     }
+    /*
+     * Nr 
+     */
 
     /*
      *Loading maps 
@@ -52,14 +53,11 @@ public class ShopFunctions {
             value.reRender(pl);
         }
     }
-    /*
-     * RefreshForPlayer
-     */
 
-    public void sendMaps(Player player) {
+    public void unload(Player player) {
         for (ShopData value : shopl.values()) {
-            if (value.getMap() != null && player != null) {
-                player.sendMap(value.getMap());
+            if (player != null) {
+                value.setUnCompleted(player.getName());
             }
         }
     }
@@ -84,30 +82,14 @@ public class ShopFunctions {
     }
 
     public boolean checkItems(Inventory inve, ItemStack costStack) {
-        int cost = costStack.getAmount();
-        boolean hasEnough = false;
-        for (ItemStack invStack : inve.getContents()) {
-            if (invStack == null) {
-                continue;
-            }
-            if (invStack.getTypeId() == costStack.getTypeId()) {
-
-                int inv = invStack.getAmount();
-                if (cost - inv >= 1) {
-                    cost = cost - inv;
-                } else {
-                    hasEnough = true;
-                    break;
-                }
-            }
-        }
-        return hasEnough;
+        return inve.containsAtLeast(costStack, costStack.getAmount());
     }
 
     public void consumeItems(Inventory inve, ItemStack costStack) {
         inve.removeItem(costStack);
 
     }
+
     public HashMap<String, ArrayList<Object>> getShopSet() {
         return shopset;
     }

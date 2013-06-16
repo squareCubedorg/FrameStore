@@ -2,7 +2,10 @@ package me.maciekmm.FrameStore;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +18,7 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemFrame;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.map.MapRenderer;
@@ -41,11 +45,12 @@ public class ShopData {
                 datas[0] = rs.getString("owner");
                 datas[1] = rs.getString("mat");
                 datas[2] = rs.getString("name");
-                datai = new int[5];
+                datai = new int[6];
                 datai[1] = rs.getInt("idd");
                 datai[2] = rs.getInt("amount");
                 datai[3] = rs.getInt("data");
                 datai[4] = rs.getInt("type");
+                datai[5] = rs.getInt("map");
                 datad = new double[2];
                 datad[0] = rs.getDouble("cost");
                 datad[1] = rs.getDouble("costs");
@@ -67,11 +72,12 @@ public class ShopData {
             } else {
                 datas[1] = null;
             }
-            datai = new int[5];
+            datai = new int[6];
             datai[1] = ShopListeners.frameshop.getShopConfig().getInt(sr + ".idd");
             datai[2] = ShopListeners.frameshop.getShopConfig().getInt(sr + ".amount");
             datai[3] = ShopListeners.frameshop.getShopConfig().getInt(sr + ".data");
             datai[4] = ShopListeners.frameshop.getShopConfig().getInt(sr + ".type");
+            datai[5] = ShopListeners.frameshop.getShopConfig().getInt(sr + ".mapid");
             datad = new double[2];
             datad[0] = ShopListeners.frameshop.getShopConfig().getDouble(sr + ".cost");
             datad[1] = ShopListeners.frameshop.getShopConfig().getDouble(sr + ".costs");
@@ -114,31 +120,39 @@ public class ShopData {
     }
 
     public void reRender(FrameStore pl) {
-
+        re.clear();
         Location nl = sl.clone();
         nl.setY(nl.getY() - 0.3);
         Entity e = nl.getWorld().spawnArrow(nl, new Vector(0, 0, 0), 0, 0);
         Iterator<Entity> it = e.getNearbyEntities(0.3, 0.3, 0.3).iterator();
         e.remove();
-        MapView mv = pl.getServer().createMap(pl.getServer().getWorlds().get(0));
-        ItemStack m = new ItemStack(Material.MAP, 1, mv.getId());
+        MapView mv;
+        if(datai[5]==0)
+        {
+            mv = pl.getServer().createMap(pl.getServer().getWorlds().get(0));
+            datai[5] = mv.getId();
+        }
+        else
+        {
+            mv = pl.getServer().getMap((short)datai[5]);
+        }
+        ItemStack m = new ItemStack(Material.MAP, 1);
+
         while (it.hasNext()) {
             Entity sd = it.next();
             if (sd instanceof ItemFrame) {
+                
                 mv.setCenterX(MAGIC_NUMBER);
                 mv.setCenterZ(0);
                 for (MapRenderer mr : mv.getRenderers()) {
-                    mv.removeRenderer(mr);
+                   mv.removeRenderer(mr);
                 }
-                mv.addRenderer(new Renderer(pl, true, datas[1], datad[0], datai[2], datas[0], datai[4], datai[1], datai[3], imsd, datas[2], datad[1]));
+                mv.addRenderer(new Renderer(pl, datas[1], datad[0], datai[2], datas[0], datai[4], datai[1], datai[3], imsd, datas[2], datad[1],this));
                 m.setDurability(mv.getId());
                 ((ItemFrame) sd).setItem(m);
                 map = mv;
             }
-
-        }
-
-
+        }     
     }
 
     public String getStringData(int nr) {
@@ -156,9 +170,11 @@ public class ShopData {
     public Inventory getInv() {
         return si;
     }
+
     public List<String> getLores() {
         return ls;
     }
+
     public void setData(int nr, String content) {
         datas[nr] = content;
     }
@@ -174,8 +190,8 @@ public class ShopData {
     public void setEnch(Map<Enchantment, Integer> m) {
         imsd = m;
     }
-    public void setLores(List<String> s)
-    {
+
+    public void setLores(List<String> s) {
         ls = s;
     }
 
@@ -198,6 +214,7 @@ public class ShopData {
                     + "`amount`=" + datai[2] + ", "
                     + "`data`=" + datai[3] + ", "
                     + "`type`=" + datai[4] + ", "
+                    + "`mapid`="+datai[5] + ", "
                     + "`enchantments`=" + imsd + ", "
                     + "`name`=" + ShopListeners.functions.nullFixer("'" + datas[2] + "'") + ", "
                     + "`lore`=" + ShopListeners.functions.nullFixer("'" + Serializer.serializeLore(ls) + "'") + ", "
@@ -209,13 +226,13 @@ public class ShopData {
             String[] pictures = {"owner:" + datas[0],
                 "mat:" + datas[1],
                 "inv:" + Serializer.toBase64(si),
-                "name:" + datas[2],
-            };
+                "name:" + datas[2],};
             String[] ints = {
                 "idd:" + datai[1],
                 "amount:" + datai[2],
                 "data:" + datai[3],
-                "type:" + datai[4]
+                "type:" + datai[4],
+                "mapid:" + datai[5]
             };
             if (imsd != null && !imsd.isEmpty()) {
                 pictures[pictures.length - 1] = "enchantments:" + Serializer.serializeEnch(imsd);
@@ -248,6 +265,16 @@ public class ShopData {
     public MapView getMap() {
         return map;
     }
+    
+    public boolean isCompleted(String p) {
+        return re.contains(p);
+    } 
+    public void setCompleted(String p) {
+        re.add(p);
+    }
+    public void setUnCompleted(String p) {
+        re.remove(p);
+    }
     private ResultSet rs;
     private String[] datas;
     private double[] datad;
@@ -257,4 +284,5 @@ public class ShopData {
     private MapView map;
     private List<String> ls;
     private Map<Enchantment, Integer> imsd;
+    HashSet<String> re = new HashSet<>();
 }
