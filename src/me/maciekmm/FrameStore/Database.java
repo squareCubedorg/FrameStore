@@ -16,6 +16,7 @@ public class Database {
                     + " `data` INT(5) default '0',"
                     + " `name` VARCHAR(50) default NULL,"
                     + " `lore` MEDIUMTEXT,"
+                    + " `mapid` INT(10) default '0',"
                     + " `enchantments` MEDIUMTEXT) CHARSET=latin1;");
         }
            
