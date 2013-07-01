@@ -41,7 +41,7 @@ public class ShopData {
                 String query = "SELECT * FROM `shops` WHERE loc='" + s + "'";
                 rs = Database.db.query(query, true);
                 rs.next();
-                datas = new String[2];
+                datas = new String[3];
                 datas[0] = rs.getString("owner");
                 datas[1] = rs.getString("mat");
                 datas[2] = rs.getString("name");
@@ -50,15 +50,21 @@ public class ShopData {
                 datai[2] = rs.getInt("amount");
                 datai[3] = rs.getInt("data");
                 datai[4] = rs.getInt("type");
-                datai[5] = rs.getInt("map");
+                datai[5] = rs.getInt("mapid");
                 datad = new double[2];
                 datad[0] = rs.getDouble("cost");
                 datad[1] = rs.getDouble("costs");
                 si = Serializer.fromBase64(rs.getString("inv"));
                 sl = Serializer.unserializeLoc(rs.getString("loc"));
                 imsd = Serializer.toItemMeta(rs.getString("enchantments"));
-                String[] ss = rs.getString("lore").split("^$");
-                ls = Arrays.asList(ss);
+                if(rs.getString("lore") == null || rs.getString("lore").isEmpty()){
+                    ls = null;
+                	}else{
+                		lore = rs.getString("lore");
+                		String[] ss = lore.split("^$");
+                        ls = Arrays.asList(ss);
+                	}
+                
 
             } catch (SQLException ex) {
                 Logger.getLogger(ShopData.class.getName()).log(Level.SEVERE, null, ex);
@@ -214,12 +220,14 @@ public class ShopData {
                     + "`amount`=" + datai[2] + ", "
                     + "`data`=" + datai[3] + ", "
                     + "`type`=" + datai[4] + ", "
-                    + "`mapid`="+datai[5] + ", "
-                    + "`enchantments`=" + imsd + ", "
+                    + "`mapid`="+ datai[5] + ", "
+                    + "`enchantments`='" + Serializer.serializeEnch(imsd) + "', "
                     + "`name`=" + ShopListeners.functions.nullFixer("'" + datas[2] + "'") + ", "
                     + "`lore`=" + ShopListeners.functions.nullFixer("'" + Serializer.serializeLore(ls) + "'") + ", "
                     + "`costs`=" + datad[1]
-                    + " WHERE loc='" + Serializer.serializeLoc(sl) + "'";
+                    + " WHERE loc='" + Serializer.serializeLoc(sl) + "';";
+            if(FrameStore.debug)
+            	FrameStore.log.info(query);
             Database.db.query(query, true);
         } else {
             String sr = Serializer.serializeLoc(sl).replaceAll("\\.", "@");
@@ -277,6 +285,7 @@ public class ShopData {
     }
     private ResultSet rs;
     private String[] datas;
+    private String lore;
     private double[] datad;
     private int[] datai;
     private Inventory si;
