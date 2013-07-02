@@ -44,23 +44,27 @@ public class FrameStore extends JavaPlugin {
     private List<String> lores = new ArrayList<>();
     private ItemStack is;
     public static boolean update = false;
+    public static boolean debug = false;
 
     @Override
     public void onEnable() {
         setupEconomy();
         new ShopListeners(this);
         loadConfiguration();
+        debug = getConfig().getBoolean("debug");
         type = getConfig().getString("database.type");
         if (type.equalsIgnoreCase("mysql")) {
             Database.db = new DatabaseConnector(this, getConfig().getString("database.addr"), getConfig().getString("database.database"), getConfig().getString("database.login"), getConfig().getString("database.password"));
             Database.createTables();
+            log.info("[FrameStore] MySQL support enabled.");
         } else {
             reloadShopConfig();
+            log.info("[FrameStore] Flatfile support enabled.");
         }
         is = new ItemStack(Material.ITEM_FRAME, 1);
         ItemMeta im = is.getItemMeta();
-        lores.add("Place a shop and trade!");
-        im.setDisplayName("Shop");
+        lores.add(getConfig().getString("shopitem.lore"));
+        im.setDisplayName(getConfig().getString("shopitem.name"));
         im.setLore(lores);
         is.setItemMeta(im);
         ShapelessRecipe r = new ShapelessRecipe(is);
@@ -69,13 +73,19 @@ public class FrameStore extends JavaPlugin {
         Bukkit.addRecipe(r);
         ShopListeners.functions.loadShops();
         ShopListeners.functions.loadMaps(this);
+        long savePeriod = (getConfig().getLong("database.savePeriod")*60)*20L;
+        long delay = 10000L;
+        if(debug)
+        	delay = 1200L;
+        	savePeriod = 1200L;
         saver = this.getServer().getScheduler().runTaskTimerAsynchronously(this, new Runnable() {
             @Override
             public void run() {
                 ShopListeners.functions.dumpToDatabase();
-                log.info("Dumping data to database");
+                if(debug)
+                	log.info("[FrameStore]Dumping data to database [DEBUG MODE]");
             }
-        }, 20000L, 40000L);
+        }, delay, savePeriod);
         if (this.getConfig().getBoolean("updatenotifications")) {
 
             try {
@@ -176,6 +186,9 @@ public class FrameStore extends JavaPlugin {
         } catch (IOException e) {
             log.log(Level.INFO, "Failed to load metrics");
         }
+        
+        if(debug)
+        	log.log(Level.INFO, "[FrameStore] DEBUG MODE!!!");
     }
 
     @Override
@@ -209,6 +222,7 @@ public class FrameStore extends JavaPlugin {
         this.getConfig().addDefault("database.password", "password");
         this.getConfig().addDefault("database.addr", "localhost");
         this.getConfig().addDefault("database.database", "frameshops");
+        this.getConfig().addDefault("database.savePeriod", 30);
         String[] pictures = {"260:items/apple.png",
             "322:items/appleGold.png",
             "262:items/arrow.png",
@@ -524,6 +538,10 @@ public class FrameStore extends JavaPlugin {
             "misc.enchantments@Enchantments:",
             "misc.owner@Owner: §16;"
         };
+        String[] shopitem = {
+                "name@Shop",
+                "lore@Place a shop and trade!"
+            };
         String[] confmessages = {
             "interacting.buying.errors.notenoughspace@You don't have space in inventory.",
             "interacting.buying.errors.notenoughmoney@You don't have enough money.",
@@ -556,11 +574,16 @@ public class FrameStore extends JavaPlugin {
             "destroying.success@Successfully removed shop."};
         this.getConfig().addDefault("downloadimages", true);
         this.getConfig().addDefault("updatenotifications", true);
+        this.getConfig().addDefault("debug", false);
         this.getConfig().addDefault("map.drawowner", true);
         this.getConfig().addDefault("map.drawid", true);
         for (String value : Arrays.asList(mapmessages)) {
             String[] s = value.split("@");
             this.getConfig().addDefault("mapmessages." + s[0], s[1]);
+        }
+        for (String value : Arrays.asList(shopitem)) {
+            String[] s = value.split("@");
+            this.getConfig().addDefault("shopitem." + s[0], s[1]);
         }
         for (String value : Arrays.asList(confmessages)) {
             String[] s = value.split("@");
