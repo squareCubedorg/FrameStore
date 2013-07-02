@@ -13,7 +13,7 @@ public class ShopFunctions {
 
     private HashMap<Location, ShopData> shopl = new HashMap<>();
     private HashMap<String, ArrayList<Object>> shopset = new HashMap<>();
-
+    
     public void dumpToDatabase() {
         for (ShopData value : shopl.values()) {
             value.upData();
@@ -24,22 +24,22 @@ public class ShopFunctions {
      * Loading shops
      */
     public void loadShops() {
-        if (FrameStore.type.equalsIgnoreCase("flat")) {
+        /*if (FrameStore.type.equalsIgnoreCase("flat")) {
             for (String s : ShopListeners.frameshop.getShopConfig().getKeys(false)) {
                 shopl.put(Serializer.unserializeLoc(s.replaceAll("@", ".")), new ShopData(s.replaceAll("@", ".")));
             }
-        } else if (FrameStore.type.equalsIgnoreCase("mysql")) {
+        } else if (FrameStore.type.equalsIgnoreCase("mysql")) {*/
             try {
                 String query = "SELECT loc FROM `shops`";
-                ResultSet rs = Database.db.query(query, true);
+                ResultSet rs = Database.db.query(query);
                 while (rs.next()) {
                     shopl.put(Serializer.unserializeLoc(rs.getString("loc")), new ShopData(rs.getString("loc")));
                 }
             } catch (SQLException e) {
-                FrameStore.log.severe("[Mysql-EcoCraft] Error while fetching companies!");
+                FrameStore.log.severe("[Mysql-EcoCraft] Error while fetching shops!");
 
             }
-        }
+        //}
     }
     /*
      * Nr 

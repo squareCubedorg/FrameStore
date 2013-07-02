@@ -2,9 +2,7 @@ package me.maciekmm.FrameStore;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -18,7 +16,6 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ItemFrame;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.map.MapRenderer;
@@ -36,10 +33,10 @@ public class ShopData {
     }
 
     private void loadData(String s) {
-        if (FrameStore.type.equalsIgnoreCase("mysql")) {
+       // if (FrameStore.type.equalsIgnoreCase("mysql")) {
             try {
                 String query = "SELECT * FROM `shops` WHERE loc='" + s + "'";
-                rs = Database.db.query(query, true);
+                rs = Database.db.query(query);
                 rs.next();
                 datas = new String[3];
                 datas[0] = rs.getString("owner");
@@ -65,11 +62,11 @@ public class ShopData {
                         ls = Arrays.asList(ss);
                 	}
                 
-
+                rs.close();
             } catch (SQLException ex) {
                 Logger.getLogger(ShopData.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } else {
+       /* } else {
             String sr = s.replaceAll("\\.", "@");
             datas = new String[3];
             datas[0] = ShopListeners.frameshop.getShopConfig().getString(sr + ".owner");
@@ -105,23 +102,23 @@ public class ShopData {
             sl = Serializer.unserializeLoc(s);
             ls = ShopListeners.frameshop.getShopConfig().getStringList(sr + ".lore");
             ShopListeners.frameshop.saveShopConfig();
-        }
+        }*/
     }
 
     private void createData(Location loc, String owner) {
         Inventory e = Bukkit.createInventory(null, 54);
-        if (FrameStore.type.equalsIgnoreCase("mysql")) {
+       // if (FrameStore.type.equalsIgnoreCase("mysql")) {
             String queryins = "INSERT INTO `shops` (`loc`, `owner`,`inv`) VALUES ('" + Serializer.serializeLoc(loc) + "','" + owner + "','" + Serializer.toBase64(e) + "')";
             Database.db.query(queryins);
-        } else {
+       /* } else {
             String[] pictures = {"owner:" + owner,
                 "inv:" + Serializer.toBase64(e)};
             for (String value : Arrays.asList(pictures)) {
                 String[] s = value.split(":");
-                ShopListeners.frameshop.getShopConfig().set(Serializer.serializeLoc(loc).replaceAll("\\.", "@") + "." + s[0], s[1]);
+         //       ShopListeners.frameshop.getShopConfig().set(Serializer.serializeLoc(loc).replaceAll("\\.", "@") + "." + s[0], s[1]);
             }
         }
-        ShopListeners.frameshop.saveShopConfig();
+       // ShopListeners.frameshop.saveShopConfig(); */
         loadData(Serializer.serializeLoc(loc));
     }
 
@@ -174,6 +171,7 @@ public class ShopData {
     }
 
     public Inventory getInv() {
+        changed = true;
         return si;
     }
 
@@ -183,22 +181,27 @@ public class ShopData {
 
     public void setData(int nr, String content) {
         datas[nr] = content;
+        changed = true;
     }
 
     public void setData(int nr, int content) {
         datai[nr] = content;
+        changed = true;
     }
 
     public void setData(int nr, double content) {
         datad[nr] = content;
+        changed = true;
     }
 
     public void setEnch(Map<Enchantment, Integer> m) {
         imsd = m;
+        changed = true;
     }
 
     public void setLores(List<String> s) {
         ls = s;
+        changed = true;
     }
 
     public Map<Enchantment, Integer> getEnch() {
@@ -210,7 +213,8 @@ public class ShopData {
     }
 
     public void upData() {
-        if (FrameStore.type.equalsIgnoreCase("mysql")) {
+       // if (FrameStore.type.equalsIgnoreCase("mysql")) {
+        if(changed) {
             String query = "UPDATE `shops` SET "
                     + "`owner`=" + ShopListeners.functions.nullFixer("'" + datas[0] + "'") + ", "
                     + "`mat`=" + ShopListeners.functions.nullFixer("'" + datas[1] + "'") + ", "
@@ -221,15 +225,14 @@ public class ShopData {
                     + "`data`=" + datai[3] + ", "
                     + "`type`=" + datai[4] + ", "
                     + "`mapid`="+ datai[5] + ", "
-                    + "`enchantments`='" + Serializer.serializeEnch(imsd) + "', "
+                    + "`enchantments`='" + ShopListeners.functions.nullFixer(Serializer.serializeEnch(imsd)) + "', "
                     + "`name`=" + ShopListeners.functions.nullFixer("'" + datas[2] + "'") + ", "
                     + "`lore`=" + ShopListeners.functions.nullFixer("'" + Serializer.serializeLore(ls) + "'") + ", "
                     + "`costs`=" + datad[1]
                     + " WHERE loc='" + Serializer.serializeLoc(sl) + "';";
-            if(FrameStore.debug)
-            	FrameStore.log.info(query);
-            Database.db.query(query, true);
-        } else {
+
+            Database.db.query(query); }
+        /*} else {
             String sr = Serializer.serializeLoc(sl).replaceAll("\\.", "@");
             String[] pictures = {"owner:" + datas[0],
                 "mat:" + datas[1],
@@ -257,16 +260,16 @@ public class ShopData {
             ShopListeners.frameshop.getShopConfig().set(sr + ".cost", datad[0]);
             ShopListeners.frameshop.getShopConfig().set(sr + ".costs", datad[1]);
             ShopListeners.frameshop.saveShopConfig();
-        }
+        }*/
     }
 
     public void removeFD() {
-        if (FrameStore.type.equalsIgnoreCase("mysql")) {
+        //if (FrameStore.type.equalsIgnoreCase("mysql")) {
             String q = "DELETE FROM `shops` WHERE loc='" + Serializer.serializeLoc(sl) + "';";
-            Database.db.query(q, true);
-        } else {
-            ShopListeners.frameshop.getShopConfig().set(Serializer.serializeLoc(sl).replaceAll("\\.", "@"), null);
-        }
+            Database.db.query(q);
+       // } else {
+        //    ShopListeners.frameshop.getShopConfig().set(Serializer.serializeLoc(sl).replaceAll("\\.", "@"), null);
+        //}
 
     }
 
@@ -293,5 +296,6 @@ public class ShopData {
     private MapView map;
     private List<String> ls;
     private Map<Enchantment, Integer> imsd;
+    private boolean changed = false;
     HashSet<String> re = new HashSet<>();
 }

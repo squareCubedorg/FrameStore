@@ -20,14 +20,11 @@ import java.util.zip.ZipInputStream;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -39,8 +36,6 @@ public class FrameStore extends JavaPlugin {
     public static Economy econ = null;
     public final static Logger log = Bukkit.getLogger();
     public static String type;
-    private FileConfiguration shopConfig = null;
-    private File shopConfigFile = null;
     private List<String> lores = new ArrayList<>();
     private ItemStack is;
     public static boolean update = false;
@@ -55,12 +50,14 @@ public class FrameStore extends JavaPlugin {
         type = getConfig().getString("database.type");
         if (type.equalsIgnoreCase("mysql")) {
             Database.db = new DatabaseConnector(this, getConfig().getString("database.addr"), getConfig().getString("database.database"), getConfig().getString("database.login"), getConfig().getString("database.password"));
-            Database.createTables();
+
             log.info("[FrameStore] MySQL support enabled.");
         } else {
-            reloadShopConfig();
-            log.info("[FrameStore] Flatfile support enabled.");
+            Database.db = new DatabaseConnector(this, this.getDataFolder() + File.pathSeparator + "shops.data");
+            //reloadShopConfig();
+            log.info("[FrameStore] Sqlite support enabled.");
         }
+        Database.createTables();
         is = new ItemStack(Material.ITEM_FRAME, 1);
         ItemMeta im = is.getItemMeta();
         lores.add(getConfig().getString("shopitem.lore"));
@@ -73,17 +70,19 @@ public class FrameStore extends JavaPlugin {
         Bukkit.addRecipe(r);
         ShopListeners.functions.loadShops();
         ShopListeners.functions.loadMaps(this);
-        long savePeriod = (getConfig().getLong("database.savePeriod")*60)*20L;
+        long savePeriod = (getConfig().getLong("database.savePeriod") * 60) * 20L;
         long delay = 10000L;
-        if(debug)
-        	delay = 1200L;
-        	savePeriod = 1200L;
+        if (debug) {
+            delay = 1200L;
+            savePeriod = 1200L;
+        }
         saver = this.getServer().getScheduler().runTaskTimerAsynchronously(this, new Runnable() {
             @Override
             public void run() {
                 ShopListeners.functions.dumpToDatabase();
-                if(debug)
-                	log.info("[FrameStore]Dumping data to database [DEBUG MODE]");
+                if (debug) {
+                    log.info("[FrameStore]Dumping data to database [DEBUG MODE]");
+                }
             }
         }, delay, savePeriod);
         if (this.getConfig().getBoolean("updatenotifications")) {
@@ -96,7 +95,7 @@ public class FrameStore extends JavaPlugin {
                 fos.getChannel().transferFrom(rbc, 0, 1 << 24);
                 try {
                     BufferedReader br = new BufferedReader(new FileReader(ShopListeners.frameshop.getDataFolder() + File.separator + "ver.txt"));
-                    String s = null;
+                    String s;
                     while ((s = br.readLine()) != null && (s = s.trim()).length() > 0) {
                         String f[] = s.split("\t");
                         if (!this.getDescription().getVersion().equals(s)) {
@@ -186,16 +185,17 @@ public class FrameStore extends JavaPlugin {
         } catch (IOException e) {
             log.log(Level.INFO, "Failed to load metrics");
         }
-        
-        if(debug)
-        	log.log(Level.INFO, "[FrameStore] DEBUG MODE!!!");
+
+        if (debug) {
+            log.log(Level.INFO, "[FrameStore] DEBUG MODE!!!");
+        }
     }
 
     @Override
     public void onDisable() {
         saver.cancel();
         this.saveConfig();
-        saveShopConfig();
+        //saveShopConfig();
         ShopListeners.functions.clearer();
     }
 
@@ -209,7 +209,7 @@ public class FrameStore extends JavaPlugin {
                     return true;
                 }
             } else {
-                sender.sendMessage("Available arguments: reload");
+                sender.sendMessage(ChatColor.DARK_RED+"Available arguments: reload");
                 return true;
             }
         }
@@ -217,7 +217,7 @@ public class FrameStore extends JavaPlugin {
     }
 
     private void loadConfiguration() {
-        this.getConfig().addDefault("database.type", "flat");
+        this.getConfig().addDefault("database.type", "sqlite");
         this.getConfig().addDefault("database.login", "login");
         this.getConfig().addDefault("database.password", "password");
         this.getConfig().addDefault("database.addr", "localhost");
@@ -539,9 +539,9 @@ public class FrameStore extends JavaPlugin {
             "misc.owner@Owner: §16;"
         };
         String[] shopitem = {
-                "name@Shop",
-                "lore@Place a shop and trade!"
-            };
+            "name@Shop",
+            "lore@Place a shop and trade!"
+        };
         String[] confmessages = {
             "interacting.buying.errors.notenoughspace@You don't have space in inventory.",
             "interacting.buying.errors.notenoughmoney@You don't have enough money.",
@@ -598,31 +598,30 @@ public class FrameStore extends JavaPlugin {
         this.saveConfig();
     }
 
-    public void reloadShopConfig() {
-        if (shopConfigFile == null) {
-            shopConfigFile = new File(getDataFolder(), "shops.yml");
-        }
-        shopConfig = YamlConfiguration.loadConfiguration(shopConfigFile);
-    }
+    /* public void reloadShopConfig() {
+     if (shopConfigFile == null) {
+     shopConfigFile = new File(getDataFolder(), "shops.yml");
+     }
+     shopConfig = YamlConfiguration.loadConfiguration(shopConfigFile);
+     }
 
-    public FileConfiguration getShopConfig() {
-        if (shopConfig == null) {
-            this.reloadShopConfig();
-        }
-        return shopConfig;
-    }
+     public FileConfiguration getShopConfig() {
+     if (shopConfig == null) {
+     this.reloadShopConfig();
+     }
+     return shopConfig;
+     }
 
-    public void saveShopConfig() {
-        if (shopConfig == null || shopConfigFile == null) {
-            return;
-        }
-        try {
-            getShopConfig().save(shopConfigFile);
-        } catch (IOException ex) {
-            this.getLogger().log(Level.SEVERE, "Could not save config to " + shopConfigFile, ex);
-        }
-    }
-
+     public void saveShopConfig() {
+     if (shopConfig == null || shopConfigFile == null) {
+     return;
+     }
+     try {
+     getShopConfig().save(shopConfigFile);
+     } catch (IOException ex) {
+     this.getLogger().log(Level.SEVERE, "Could not save config to " + shopConfigFile, ex);
+     }
+     } */
     public ItemStack getFrameItem() {
         return is;
     }

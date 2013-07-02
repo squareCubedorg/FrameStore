@@ -71,9 +71,6 @@ public class ShopListeners implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerDetroyShop(HangingBreakByEntityEvent e) {
-        if (e.isCancelled()) {
-            return;
-        }
         if (e.getEntity() instanceof ItemFrame) {
             ItemFrame isf = (ItemFrame) e.getEntity();
             if (isf.getItem().getType().equals(Material.MAP)) {
