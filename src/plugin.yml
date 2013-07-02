@@ -1,6 +1,6 @@
 name: FrameStore
 main: me.maciekmm.FrameStore.FrameStore
-version: B1.3.0
+version: B1.3.1
 author: maciekmm
 depend: [Vault]
 commands:
