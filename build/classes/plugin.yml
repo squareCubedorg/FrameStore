@@ -1,10 +1,27 @@
 name: FrameStore
 main: me.maciekmm.FrameStore.FrameStore
 version: PR1.4.0
+website: http://maciekmm.tk
 author: maciekmm
 depend: [Vault]
 commands:
    fs:
       description: FrameStore global command
       usage: /<command>
-
+      permission: framestore.admin
+permissions:
+   framestore.use.buy.adminshop:
+      description: Let you buy from adminshops
+      default: true
+   framestore.use.buy.normal:
+      description: Let you buy from regular shops
+      default: true
+   framestore.use.sell.adminshops:
+      description: Let you sell to adminshops
+      default: true
+   framestore.use.sell.normal:
+      description: Let you sell to regular shops
+      default: true
+   framestore.admin:
+      description: Let you create adminshops, reload and save data.
+      default: false
