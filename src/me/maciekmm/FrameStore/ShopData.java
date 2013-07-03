@@ -82,29 +82,21 @@ public class ShopData {
                 for (MapRenderer mr : mv.getRenderers()) {
                     mv.removeRenderer(mr);
                 }
-                if(item!=null)
-                {
+                if (item != null) {
                     ItemMeta im = item.getItemMeta();
-                    
+
                     mv.addRenderer(
                             new Renderer(pl,
-                            item.getType().toString().toLowerCase(),
+                            this,
+                            item,
                             datad[0],
-                            amount, 
-                            owner, 
-                            type,
-                            item.getTypeId(),
-                            item.getData().getData(),
-                            im.getEnchants(),
-                            im.getDisplayName(),
                             datad[1],
-                            this));
+                            owner,
+                            type));
+                } else {
+                    mv.addRenderer(new Renderer(pl, this, null, datad[0],datad[1],owner,type));
                 }
-                else
-                {
-                    mv.addRenderer(new Renderer(pl, null, datad[0],0, owner, type, 0, 0, null, null, datad[1], this));
-                }
-                
+
                 m.setDurability(mv.getId());
                 ((ItemFrame) sd).setItem(m);
                 map = mv;
@@ -123,25 +115,33 @@ public class ShopData {
     public double getSellCost() {
         return datad[1];
     }
+
     public int getType() {
         return type;
     }
+
     public ItemStack getItem() {
-        if(item!=null&&amount!=0)
-        item.setAmount(amount);
-        
+        if (item != null && amount != 0) {
+            item.setAmount(amount);
+        }
+
         return item;
     }
+
     public int getAmount() {
-            return amount;}
+        return amount;
+    }
+
     public void setAmount(int amount) {
         this.amount = amount;
-        changed=true;
+        changed = true;
     }
-    public void setItem(ItemStack is)  {
+
+    public void setItem(ItemStack is) {
         changed = true;
         item = is.clone();
     }
+
     public Inventory getInv() {
         changed = true;
         return si;
@@ -156,10 +156,12 @@ public class ShopData {
         datad[1] = sellCost;
         changed = true;
     }
+
     public void setType(int type) {
         this.type = type;
         changed = true;
-    } 
+    }
+
     public Location getLoc() {
         return sl;
     }
@@ -173,11 +175,11 @@ public class ShopData {
                     + "`sellcost`=" + datad[1] + ", "
                     + "`item`=" + ShopListeners.functions.nullFixer("'" + Serializer.getStringFromItem(item) + "'") + ", "
                     + "`type`=" + type + ", "
-                    + "`amount`="+amount+", "
+                    + "`amount`=" + amount + ", "
                     + "`mapid`=" + mapid
                     + " WHERE `loc`='" + Serializer.serializeLoc(sl) + "'";
             Database.db.query(query);
-            changed=false;
+            changed = false;
         }
     }
 
@@ -206,7 +208,7 @@ public class ShopData {
     private String owner;
     private double[] datad;
     private Inventory si;
-    private int mapid,amount,type;
+    private int mapid, amount, type;
     private Location sl;
     private MapView map;
     private boolean changed = false;

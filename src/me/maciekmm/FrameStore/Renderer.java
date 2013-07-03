@@ -6,8 +6,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import javax.imageio.ImageIO;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.map.MapCanvas;
 import org.bukkit.map.MapRenderer;
 import org.bukkit.map.MapView;
@@ -19,44 +22,42 @@ import org.bukkit.map.MinecraftFont;
  */
 public class Renderer extends MapRenderer {
 
-    Font test;
     FrameStore plg;
-    double cost, costs;
-    int amount, idd, data, type;
+    double cost, sellcost;
+    int type;
     Image i;
-    String name, seller, cname;
+    String seller,name;
     ShopData sd;
-    Map<Enchantment, Integer> imsd;
-    public Renderer(FrameStore plg, String name, double cost, int amount, String seller, int type, int idd, int data, Map<Enchantment, Integer> imsd, String cname, double costs,ShopData sd) {
+    ItemStack item;
+    public Renderer(FrameStore plg,ShopData sd, ItemStack item, double cost,double costs, String seller, int type) {
         super(true);
         this.plg = plg;
+        if(item!=null)
+        {
+            File sourceimage = new File(plg.getDataFolder() + File.separator + "textures" + File.separator + plg.getConfig().getString("pictures." + item.getTypeId() + "@" + item.getData().getData()));
+            if (!sourceimage.exists()) {
+                sourceimage = new File(plg.getDataFolder() + File.separator + "textures" + File.separator + plg.getConfig().getString("pictures." + item.getTypeId()));
+            }
+            try {
+                i = ImageIO.read(sourceimage);
 
-        File sourceimage = new File(plg.getDataFolder() + File.separator + "textures" + File.separator + plg.getConfig().getString("pictures." + idd + "@" + data));
-        if (!sourceimage.exists()) {
-            sourceimage = new File(plg.getDataFolder() + File.separator + "textures" + File.separator + plg.getConfig().getString("pictures." + idd));
-        }
-        try {
-            i = ImageIO.read(sourceimage);
-
-        } catch (IOException ex) {
-        }
-        //this.stock = stock;
-        if (cname != null && !cname.equalsIgnoreCase("null") && cname.length() < 12) {
-            this.name = cname;
-        } else if (cname != null && !cname.equalsIgnoreCase("null")) {
-            this.name = "Custom " + name;
+            } catch (IOException ex) {
+            }
+        
+        if (item.getItemMeta().getDisplayName() != null && item.getItemMeta().getDisplayName().length() < 12) {
+            this.name = item.getItemMeta().getDisplayName();
+        } else if (item.getItemMeta().getDisplayName() != null) {
+            this.name = plg.getMessage("mapmessages.misc.custom") + item.getType().toString().toLowerCase();
         } else {
-            this.name = name;
+            this.name = item.getType().toString().toLowerCase();
+        }
         }
         this.seller = seller;
-        this.amount = amount;
         this.type = type;
         this.cost = cost;
         this.sd = sd;
-        this.idd = idd;
-        this.data = data;
-        this.imsd = imsd;
-        this.costs = costs;
+        this.sellcost = costs;
+        this.item = item;
 
     }
     @Override
@@ -93,23 +94,27 @@ public class Renderer extends MapRenderer {
 
             if (type == 5 || type == 6) {
                 canvas.drawText(6, 3 * fh + 11, MinecraftFont.Font, plg.getMessage("mapmessages.misc.costbuy") + cost);
-                canvas.drawText(6, 4 * fh + 11, MinecraftFont.Font, plg.getMessage("mapmessages.misc.costsell") + costs);
+                canvas.drawText(6, 4 * fh + 11, MinecraftFont.Font, plg.getMessage("mapmessages.misc.costsell") + sellcost);
             } else {
                 canvas.drawText(6, 3 * fh + 11, MinecraftFont.Font, plg.getMessage("mapmessages.misc.cost") + cost);
             }
-            if (amount!=65)
-            canvas.drawText(6, 5 * fh + 11, MinecraftFont.Font, plg.getMessage("mapmessages.misc.amount") + amount);
-            else
-            {
-              canvas.drawText(6, 5 * fh + 11, MinecraftFont.Font, plg.getMessage("mapmessages.misc.amount") + 0);  
+            canvas.drawText(6, 5 * fh + 11, MinecraftFont.Font, plg.getMessage("mapmessages.misc.amount") + sd.getAmount());
+            if (plg.getConfig().getBoolean("map.drawid")&&item!=null) {
+                canvas.drawText(6, 6 * fh + 11, MinecraftFont.Font, plg.getMessage("mapmessages.misc.id") + item.getTypeId() + ":" + item.getData().getData());
             }
-            if (plg.getConfig().getBoolean("map.drawid")) {
-                canvas.drawText(6, 6 * fh + 11, MinecraftFont.Font, plg.getMessage("mapmessages.misc.id") + idd + ":" + data);
-            }
-            if (imsd != null && !imsd.isEmpty() && type != 4 && type != 2) {
+            if (item!=null && this.item.getEnchantments() != null && !this.item.getEnchantments().isEmpty() && type != 4 && type != 2) {
                 canvas.drawText(6, 7 * fh + 11, MinecraftFont.Font, plg.getMessage("mapmessages.misc.enchantments"));
                 int line = 1;
-                for (Map.Entry thisEntry : imsd.entrySet()) {
+                for (Map.Entry thisEntry : this.item.getEnchantments().entrySet()) {
+                    canvas.drawText(6, (7 + line) * fh + 11, MinecraftFont.Font, ((Enchantment) thisEntry.getKey()).getName() + ": " + thisEntry.getValue());
+                    line++;
+                }
+            }
+            if (item!=null && item.hasItemMeta() && item.getType() == Material.ENCHANTED_BOOK) {
+                canvas.drawText(6, 7 * fh + 11, MinecraftFont.Font, plg.getMessage("mapmessages.misc.enchantments"));
+                EnchantmentStorageMeta itemmeta  = (EnchantmentStorageMeta)item.getItemMeta();
+                int line = 1;
+                for(Map.Entry thisEntry : itemmeta.getStoredEnchants().entrySet()) {
                     canvas.drawText(6, (7 + line) * fh + 11, MinecraftFont.Font, ((Enchantment) thisEntry.getKey()).getName() + ": " + thisEntry.getValue());
                     line++;
                 }

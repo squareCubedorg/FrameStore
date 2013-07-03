@@ -4,6 +4,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import static me.maciekmm.FrameStore.FrameStore.debug;
+import static me.maciekmm.FrameStore.FrameStore.log;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -13,41 +15,29 @@ public class ShopFunctions {
 
     private HashMap<Location, ShopData> shopl = new HashMap<>();
     private HashMap<String, ArrayList<Object>> shopset = new HashMap<>();
-    
+
     public void dumpToDatabase() {
+        if (debug) {
+            log.info("[FrameStore]Dumping data to database [DEBUG MODE]");
+        }
         for (ShopData value : shopl.values()) {
             value.upData();
         }
     }
 
-    /**
-     * Loading shops
-     */
     public void loadShops() {
-        /*if (FrameStore.type.equalsIgnoreCase("flat")) {
-            for (String s : ShopListeners.frameshop.getShopConfig().getKeys(false)) {
-                shopl.put(Serializer.unserializeLoc(s.replaceAll("@", ".")), new ShopData(s.replaceAll("@", ".")));
+        try {
+            String query = "SELECT loc FROM `shops`";
+            ResultSet rs = Database.db.query(query);
+            while (rs.next()) {
+                shopl.put(Serializer.unserializeLoc(rs.getString("loc")), new ShopData(rs.getString("loc")));
             }
-        } else if (FrameStore.type.equalsIgnoreCase("mysql")) {*/
-            try {
-                String query = "SELECT loc FROM `shops`";
-                ResultSet rs = Database.db.query(query);
-                while (rs.next()) {
-                    shopl.put(Serializer.unserializeLoc(rs.getString("loc")), new ShopData(rs.getString("loc")));
-                }
-            } catch (SQLException e) {
-                FrameStore.log.severe("[Mysql-EcoCraft] Error while fetching shops!");
+        } catch (SQLException e) {
+            FrameStore.log.severe("[Mysql-EcoCraft] Error while fetching shops!");
 
-            }
-        //}
+        }
     }
-    /*
-     * Nr 
-     */
 
-    /*
-     *Loading maps 
-     */
     public void loadMaps(FrameStore pl) {
         for (ShopData value : shopl.values()) {
             value.reRender(pl);

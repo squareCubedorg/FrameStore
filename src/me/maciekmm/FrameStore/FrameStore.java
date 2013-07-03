@@ -50,11 +50,9 @@ public class FrameStore extends JavaPlugin {
         type = getConfig().getString("database.type");
         if (type.equalsIgnoreCase("mysql")) {
             Database.db = new DatabaseConnector(this, getConfig().getString("database.addr"), getConfig().getString("database.database"), getConfig().getString("database.login"), getConfig().getString("database.password"));
-
             log.info("[FrameStore] MySQL support enabled.");
         } else {
             Database.db = new DatabaseConnector(this, this.getDataFolder() + File.separator + "shops");
-            //reloadShopConfig();
             log.info("[FrameStore] Sqlite support enabled.");
         }
         Database.createTables();
@@ -80,9 +78,6 @@ public class FrameStore extends JavaPlugin {
             @Override
             public void run() {
                 ShopListeners.functions.dumpToDatabase();
-                if (debug) {
-                    log.info("[FrameStore]Dumping data to database [DEBUG MODE]");
-                }
             }
         }, delay, savePeriod);
         if (this.getConfig().getBoolean("updatenotifications")) {
@@ -195,7 +190,6 @@ public class FrameStore extends JavaPlugin {
     public void onDisable() {
         saver.cancel();
         this.saveConfig();
-        //saveShopConfig();
         ShopListeners.functions.clearer();
     }
 
@@ -208,8 +202,13 @@ public class FrameStore extends JavaPlugin {
                     sender.sendMessage(ChatColor.DARK_GREEN + "Successfully reloaded config!");
                     return true;
                 }
+                else if (args[0].equalsIgnoreCase("save") && sender.hasPermission("framestore.admin")) {
+                    ShopListeners.functions.dumpToDatabase();
+                    sender.sendMessage(ChatColor.DARK_GREEN + "Successfully saved shops!");
+                    return true;
+                }
             } else {
-                sender.sendMessage(ChatColor.DARK_RED + "Available arguments: reload");
+                sender.sendMessage(ChatColor.DARK_RED + "Available arguments: reload, save");
                 return true;
             }
         }
@@ -536,7 +535,8 @@ public class FrameStore extends JavaPlugin {
             "misc.amount@Amount: §28;",
             "misc.id@Id: ",
             "misc.enchantments@Enchantments:",
-            "misc.owner@Owner: §16;"
+            "misc.owner@Owner: §16;",
+            "misc.custom@Custom "
         };
         String[] shopitem = {
             "name@Shop",
@@ -569,7 +569,7 @@ public class FrameStore extends JavaPlugin {
             "creating.global.admin.settingtype@Type in chat what type would you like:\n Shop is 1,\n Sell is 2,\n AdminShop shop is 3,\n AdminShop sell is 4,\n Buy/Sell is 5 \n Buy/Sell AdminShop is 6",
             "creating.errors.invalidcost@Cost must be greater than 0",
             "creating.errors.othershopoverlaying@You cannot place shop here, other shop is here!",
-            "creating.errors.permdenied@You are not permitted to create shops!",
+            "creating.errors.permdenied@You are not permitted!",
             "destroying.errors.notanowner@You are not a shop owner!",
             "destroying.success@Successfully removed shop."};
         this.getConfig().addDefault("downloadimages", true);
