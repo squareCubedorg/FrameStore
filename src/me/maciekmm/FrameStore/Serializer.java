@@ -116,54 +116,6 @@ public class Serializer {
     }
 
     /*
-     * @author maciekmm
-     */
-    public static String serializeEnch(Map<Enchantment, Integer> im) {
-        if (im != null) {
-            StringBuilder sb = new StringBuilder();
-            for (Entry thisEntry : im.entrySet()) {
-                sb.append(((Enchantment) thisEntry.getKey()).getId()).append("@").append(thisEntry.getValue()).append("!");
-            }
-            return sb.toString();
-        } else {
-            return null;
-        }
-    }
-
-    public static String serializeLore(List<String> ls) {
-        if (ls == null || ls.isEmpty()) {
-            return null;
-        } else {
-            StringBuilder sb = new StringBuilder();
-            for (String s : ls) {
-                sb.append(s).append("^$");
-            }
-            return sb.toString();
-        }
-    }
-
-    public static Map<Enchantment, Integer> toItemMeta(String s) {
-        if (s != null && !s.equalsIgnoreCase("null") && !s.equals("")) {
-            Map<Enchantment, Integer> em = new HashMap<>();
-            String[] eslist = s.split("!");
-            for (int i = 0; i <= eslist.length - 1; i++) {
-                String[] ese = eslist[i].split("@");
-                em.put(Enchantment.getById(Integer.parseInt(ese[0])), Integer.parseInt(ese[1]));
-            }
-            return em;
-        } else {
-            return null;
-        }
-    }
-
-    public static void addEnchantments(ItemStack is, Map<Enchantment, Integer> em) {
-        ItemMeta im = is.getItemMeta();
-        for (Entry thisEntry : em.entrySet()) {
-            im.addEnchant((Enchantment) thisEntry.getKey(), (Integer) thisEntry.getValue(), true);
-        }
-        is.setItemMeta(im);
-    }
-    /*
      * @author Comphenix
      */
 
