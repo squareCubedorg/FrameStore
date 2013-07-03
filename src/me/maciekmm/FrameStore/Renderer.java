@@ -97,7 +97,12 @@ public class Renderer extends MapRenderer {
             } else {
                 canvas.drawText(6, 3 * fh + 11, MinecraftFont.Font, plg.getMessage("mapmessages.misc.cost") + cost);
             }
+            if (amount!=65)
             canvas.drawText(6, 5 * fh + 11, MinecraftFont.Font, plg.getMessage("mapmessages.misc.amount") + amount);
+            else
+            {
+              canvas.drawText(6, 5 * fh + 11, MinecraftFont.Font, plg.getMessage("mapmessages.misc.amount") + 0);  
+            }
             if (plg.getConfig().getBoolean("map.drawid")) {
                 canvas.drawText(6, 6 * fh + 11, MinecraftFont.Font, plg.getMessage("mapmessages.misc.id") + idd + ":" + data);
             }

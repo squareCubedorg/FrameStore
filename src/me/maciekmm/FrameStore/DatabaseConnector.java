@@ -9,7 +9,6 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 public class DatabaseConnector {
 
     private final FrameStore plugin;
@@ -50,12 +49,9 @@ public class DatabaseConnector {
     }
 
     public ResultSet query(final String query) {
-        if(!plugin.type.equalsIgnoreCase("mysql"))
-        {
-            return query(convert(query),false);
-        }
-        else
-        {
+        if (!plugin.type.equalsIgnoreCase("mysql")) {
+            return query(convert(query), false);
+        } else {
             return query(query, false);
         }
     }
@@ -95,11 +91,11 @@ public class DatabaseConnector {
 
         return null;
     }
-    
+
     private String convert(String mysqlQuery) {
         return mysqlQuery.replaceAll("`", "\"").
                 replaceAll("/(int|integer)\\(/i", "(").
                 replaceAll("/\\(NULL(\\s|\\t)?\\,/i", "(").
-                replaceAll("/DEFAULT '(.*)'/im","DEFAULT \"$1\"").replaceAll("AUTO_INCREMENT", "");
+                replaceAll("/DEFAULT '(.*)'/im", "DEFAULT \"$1\"").replaceAll("AUTO_INCREMENT", "");
     }
 }

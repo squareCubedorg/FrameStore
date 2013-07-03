@@ -79,55 +79,15 @@ public class ShopListeners implements Listener {
                     ShopData sd = functions.getshopl().get(e.getEntity().getLocation());
                     if (e.getRemover() instanceof Player) {
                         Player remo = (Player) e.getRemover();
-                        if (!sd.getStringData(0).equalsIgnoreCase(remo.getName()) && !remo.hasPermission("framestore.admin")) {
-                            if (sd.getIntData(4) == 5) {
-                                if (sd.getInv() != null && sd.getIntData(4) != 0 && sd.getIntData(1) != 0 && sd.getInv().firstEmpty() != -1) {
-                                    ItemStack con = new ItemStack(sd.getIntData(1), sd.getIntData(2), (byte) sd.getIntData(3));
-                                    if (sd.getEnch() != null && !sd.getEnch().isEmpty()) {
-                                        Serializer.addEnchantments(con, sd.getEnch());
-                                    }
-                                    if (!functions.checkItems(remo.getInventory(), con)) {
-                                        remo.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.buying.errors.noitems"));
-                                        return;
-                                    }
-                                    if (!FrameStore.econ.withdrawPlayer(Bukkit.getOfflinePlayer(sd.getStringData(0)).getName(), sd.getDoubleData(0)).transactionSuccess()) {
-                                        remo.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.selling.errors.notenoughmoney"));
-                                        return;
-                                    }
-                                    FrameStore.econ.depositPlayer(remo.getName(), sd.getDoubleData(0));
-                                    sd.getInv().addItem(con);
-                                    functions.consumeItems(remo.getInventory(), con);
-                                    String success = frameshop.getMessage("confmessages.interacting.selling.success").replaceAll("%amount%", String.valueOf(sd.getIntData(2))).replaceAll("%name%", sd.getStringData(1));
-                                    remo.sendMessage(ChatColor.DARK_GREEN + success);
-                                } else {
-                                    remo.sendMessage(ChatColor.DARK_RED + "Shop is not configured or doesn't have enough space or you don't have items in inventory!");
-                                }
-                            } else if (sd.getIntData(4) == 6) {
-                                if (sd.getInv() != null && sd.getIntData(4) != 0 && sd.getIntData(1) != 0 && functions.checkItems(remo.getInventory(), new ItemStack(sd.getIntData(1), sd.getIntData(2), (byte) sd.getIntData(3)))) {
-                                    ItemStack con = new ItemStack(sd.getIntData(1), sd.getIntData(2), (byte) sd.getIntData(3));
-                                    if (sd.getEnch() != null && !sd.getEnch().isEmpty()) {
-                                        Serializer.addEnchantments(con, sd.getEnch());
-                                    }
-                                    if (!functions.checkItems(remo.getInventory(), con)) {
-                                        remo.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.selling.errors.noitems"));
-                                        return;
-                                    }
-                                    FrameStore.econ.depositPlayer(remo.getName(), sd.getDoubleData(0));
-                                    functions.consumeItems(remo.getInventory(), con);
-                                    String success = frameshop.getMessage("confmessages.interacting.selling.success").replaceAll("%amount%", String.valueOf(sd.getIntData(2))).replaceAll("%name%", sd.getStringData(1));
-                                    remo.sendMessage(ChatColor.DARK_GREEN + success);
-                                    //sd.getInv().addItem(con);
-                                } else if (!functions.checkItems(remo.getInventory(), new ItemStack(sd.getIntData(1), sd.getIntData(2), (byte) sd.getIntData(3)))) {
-                                    remo.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.selling.errors.noitems"));
-                                } else {
-                                    remo.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.errors.notconfigured"));
-                                }
-
+                        if (!sd.getOwner().equalsIgnoreCase(remo.getName()) && !remo.hasPermission("framestore.admin")) {
+                            if (sd.getType() == 5) {
+                                sellingToShop(sd,remo,false,false);
+                            } else if (sd.getType() == 6) {
+                                sellingToShop(sd,remo,true,false);
                             } else {
                                 remo.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.destroying.errors.notanowner"));
                             }
-
-                        } else if (sd.getStringData(0).equalsIgnoreCase(remo.getName()) || remo.isOp()) {
+                        } else if (sd.getOwner().equalsIgnoreCase(remo.getName()) || remo.isOp()) {
                             sd.removeFD();
                             for (ItemStack is : sd.getInv().getContents()) {
                                 if (is != null) {
@@ -136,7 +96,7 @@ public class ShopListeners implements Listener {
                                 }
                             }
                             functions.getshopl().remove(isf.getLocation());
-                            if (e.getRemover() instanceof Player && (((Player) e.getRemover()).getName().equalsIgnoreCase(sd.getStringData(0)) || ((Player) e.getRemover()).isOp())) {
+                            if (e.getRemover() instanceof Player && (((Player) e.getRemover()).getName().equalsIgnoreCase(sd.getOwner()) || ((Player) e.getRemover()).isOp())) {
                                 ((Player) e.getRemover()).sendMessage(ChatColor.DARK_GREEN + frameshop.getMessage("confmessages.destroying.success"));
                                 isf.getLocation().getWorld().dropItem(isf.getLocation(), frameshop.getFrameItem());
                                 e.getEntity().remove();
@@ -196,23 +156,14 @@ public class ShopListeners implements Listener {
                 if (functions.getshopl().containsKey(enn.getLocation())) {
 
                     ShopData sd = functions.getshopl().get(enn.getLocation());
-                    if (sd.getStringData(0).equals(p.getName())) {
-                        if (sd.getStringData(1) != null && sd.getDoubleData(0) != 0 && sd.getIntData(2) != 0) {
+                    if (sd.getOwner().equals(p.getName())) {
+                        if (sd.getItem() != null && sd.getCost() != 0 && sd.getAmount() != 0) {
                             p.openInventory(sd.getInv());
-                        } else if (p.getItemInHand().getType() != Material.AIR && sd.getStringData(1) == null) {
-                            ItemStack iih = p.getItemInHand();
-                            sd.setData(1, iih.getType().name().toLowerCase());
-                            sd.setData(1, (int) iih.getTypeId());
-                            sd.setData(3, (int) iih.getData().getData());
-                            if (iih.getItemMeta().getDisplayName() != null) {
-                                sd.setData(2, iih.getItemMeta().getDisplayName());
-                            }
-                            if (iih.getItemMeta().getLore() != null) {
-                                sd.setLores(iih.getItemMeta().getLore());
-                            }
-                            sd.setEnch(iih.getItemMeta().getEnchants());
+                        } else if (p.getItemInHand().getType() != Material.AIR && sd.getItem() == null) {
+                            ItemStack iih = p.getItemInHand().clone();
+                            sd.setItem(iih);
                             sd.reRender(frameshop);
-                        } else if (sd.getIntData(4) == 0 && sd.getStringData(1) != null) {
+                        } else if (sd.getType() == 0 && sd.getItem() != null) {
                             ArrayList<Object> al = new ArrayList<>();
                             al.add(0, 1);
                             al.add(1, Serializer.serializeLoc(enn.getLocation()));
@@ -222,13 +173,13 @@ public class ShopListeners implements Listener {
                                 p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.creating.global.settingtype"));
                             }
                             functions.getShopSet().put(p.getName(), al);
-                        } else if (sd.getIntData(2) == 0 && sd.getStringData(1) != null) {
+                        } else if (sd.getItem() != null && sd.getAmount() == 0) {
                             ArrayList<Object> al = new ArrayList<>();
                             al.add(0, 2);
                             al.add(1, Serializer.serializeLoc(enn.getLocation()));
                             p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.creating.global.settingamount"));
                             functions.getShopSet().put(p.getName(), al);
-                        } else if (sd.getDoubleData(0) == 0.0 && sd.getStringData(1) != null) {
+                        } else if (sd.getCost() == 0.0 && sd.getItem() != null) {
                             ArrayList<Object> al = new ArrayList<>();
                             al.add(0, 3);
                             al.add(1, Serializer.serializeLoc(enn.getLocation()));
@@ -238,109 +189,14 @@ public class ShopListeners implements Listener {
                             p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.creating.global.settingitem"));
                         }
                     } else {
-                        if (sd.getIntData(4) == 1 || sd.getIntData(4) == 5) {
-                            if (sd.getInv() != null && sd.getIntData(4) != 0 && sd.getIntData(1) != 0 && sd.getIntData(2) != 0) {
-                                ItemStack con = new ItemStack(sd.getIntData(1), sd.getIntData(2), (byte) sd.getIntData(3));
-                                if (sd.getEnch() != null && !sd.getEnch().isEmpty()) {
-                                    Serializer.addEnchantments(con, sd.getEnch());
-                                }
-                                if (!functions.checkItems(sd.getInv(), con)) {
-                                    p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.buying.errors.noitems"));
-                                    return;
-                                }
-                                con.setItemMeta(sd.getInv().getItem(sd.getInv().first(con.getType())).getItemMeta());
-                                if (p.getInventory().firstEmpty() == -1) {
-                                    p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.buying.errors.notenoughspace"));
-                                    return;
-                                }
-                                if (!FrameStore.econ.withdrawPlayer(p.getName(), sd.getDoubleData(0)).transactionSuccess()) {
-
-                                    p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.buying.errors.notenoughmoney"));
-                                    return;
-                                }
-                                FrameStore.econ.depositPlayer(sd.getStringData(0), sd.getDoubleData(0));
-                                functions.consumeItems(sd.getInv(), con);
-                                p.getInventory().addItem(con);
-                                String success = frameshop.getMessage("confmessages.interacting.buying.success").replaceAll("%amount%", String.valueOf(sd.getIntData(2))).replaceAll("%name%", sd.getStringData(1));
-                                p.sendMessage(ChatColor.DARK_GREEN + success);
-                            } else {
-                                p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.errors.notconfigured"));
-                            }
-                        } else if (sd.getIntData(4) == 2) {
-                            if (sd.getInv() != null && sd.getIntData(4) != 0 && sd.getIntData(1) != 0 && sd.getInv().firstEmpty() != -1) {
-                                ItemStack con = new ItemStack(sd.getIntData(1), sd.getIntData(2), (byte) sd.getIntData(3));
-                                if (sd.getEnch() != null && !sd.getEnch().isEmpty()) {
-                                    Serializer.addEnchantments(con, sd.getEnch());
-                                }
-                                if (!functions.checkItems(p.getInventory(), con)) {
-                                    p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.selling.errors.noitems"));
-                                    return;
-                                }
-                                if (!FrameStore.econ.withdrawPlayer(Bukkit.getOfflinePlayer(sd.getStringData(0)).getName(), sd.getDoubleData(0)).transactionSuccess()) {
-                                    p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.selling.errors.notenoughmoney"));
-                                    return;
-                                }
-                                FrameStore.econ.depositPlayer(p.getName(), sd.getDoubleData(0));
-                                functions.consumeItems(p.getInventory(), con);
-                                sd.getInv().addItem(con);
-                                String success = frameshop.getMessage("confmessages.interacting.selling.success").replaceAll("%amount%", String.valueOf(sd.getIntData(2))).replaceAll("%name%", sd.getStringData(1));
-                                p.sendMessage(ChatColor.DARK_GREEN + success);
-                            } else {
-                                p.sendMessage(ChatColor.DARK_RED + "Shop is not configured or doesn't have enough space or you don't have items in inventory!");
-                            }
-                        } else if (sd.getIntData(4) == 3 || sd.getIntData(4) == 6) {
-                            if (sd.getIntData(4) != 0 && sd.getIntData(1) != 0 && sd.getIntData(2) != 0) {
-                                ItemStack con = new ItemStack(sd.getIntData(1), sd.getIntData(2), (byte) sd.getIntData(3));
-                                if (sd.getEnch() != null && !sd.getEnch().isEmpty()) {
-
-                                    Serializer.addEnchantments(con, sd.getEnch());
-                                }
-                                if (sd.getLores() != null && !sd.getLores().isEmpty()) {
-                                    ItemMeta im = con.getItemMeta();
-                                    im.setLore(sd.getLores());
-                                    con.setItemMeta(im);
-                                }
-                                if (sd.getStringData(2) != null && !sd.getStringData(2).equalsIgnoreCase("null")) {
-                                    ItemMeta im = con.getItemMeta();
-                                    im.setDisplayName(sd.getStringData(2));
-                                    con.setItemMeta(im);
-                                }
-                                if (p.getInventory().firstEmpty() == -1) {
-                                    p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.buying.errors.notenoughspace"));
-                                    return;
-                                }
-                                if (!FrameStore.econ.withdrawPlayer(p.getName(), sd.getDoubleData(0)).transactionSuccess()) {
-
-                                    p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.buying.errors.notenoughmoney"));
-                                    return;
-                                }
-                                String success = frameshop.getMessage("confmessages.interacting.buying.success").replaceAll("%amount%", String.valueOf(sd.getIntData(2))).replaceAll("%name%", sd.getStringData(1));
-                                p.sendMessage(ChatColor.DARK_GREEN + success);
-                                p.getInventory().addItem(con);
-
-                            } else {
-                                p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.errors.notconfigured"));
-                            }
-                        } else if (sd.getIntData(4) == 4) {
-                            if (sd.getInv() != null && sd.getIntData(4) != 0 && sd.getIntData(1) != 0) {
-                                ItemStack con = new ItemStack(sd.getIntData(1), sd.getIntData(2), (byte) sd.getIntData(3));
-                                if (sd.getEnch() != null && !sd.getEnch().isEmpty()) {
-                                    Serializer.addEnchantments(con, sd.getEnch());
-                                }
-                                if (!functions.checkItems(p.getInventory(), con)) {
-                                    p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.selling.errors.noitems"));
-                                    return;
-                                }
-                                FrameStore.econ.depositPlayer(p.getName(), sd.getDoubleData(0));
-                                functions.consumeItems(p.getInventory(), con);
-                                String success = frameshop.getMessage("confmessages.interacting.selling.success").replaceAll("%amount%", String.valueOf(sd.getIntData(2))).replaceAll("%name%", sd.getStringData(1));
-                                p.sendMessage(ChatColor.DARK_GREEN + success);
-                                //sd.getInv().addItem(con);
-                            } else if (!functions.checkItems(e.getPlayer().getInventory(), new ItemStack(sd.getIntData(1), sd.getIntData(2), (byte) sd.getIntData(3)))) {
-                                p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.selling.errors.noitems"));
-                            } else {
-                                p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.errors.notconfigured"));
-                            }
+                        if (sd.getType() == 1 || sd.getType() == 5) {
+                            buyingFromShop(sd,p,false);
+                        } else if (sd.getType() == 2) {
+                            sellingToShop(sd,p,false,true);
+                        } else if (sd.getType() == 3 || sd.getType() == 6) {
+                            buyingFromShop(sd,p,true);
+                        } else if (sd.getType() == 4) {
+                            sellingToShop(sd,p,true,true);
 
                         } else {
                             p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.errors.notconfigured"));
@@ -376,9 +232,8 @@ public class ShopListeners implements Listener {
                                 @Override
                                 public void run() {
                                     ShopData sd = functions.getshopl().get(Serializer.unserializeLoc(slc));
-                                    sd.setData(4, (int) am);
+                                    sd.setType((int) am);
                                     sd.reRender(frameshop);
-
                                 }
                             });
                             //EcoListeners.functions.getShopSet().remove(p.getName());
@@ -394,20 +249,20 @@ public class ShopListeners implements Listener {
                         break;
                     case 2:
                         ShopData sd = functions.getshopl().get(Serializer.unserializeLoc(slc));
-                        int mss = new ItemStack(sd.getIntData(1), 1).getMaxStackSize();
+                        int mss = sd.getItem().getMaxStackSize();
                         if (am <= mss && am > 0) {
                             frameshop.getServer().getScheduler().runTask(frameshop, new Runnable() {
                                 @Override
                                 public void run() {
                                     ShopData sd = functions.getshopl().get(Serializer.unserializeLoc(slc));
-                                    sd.setData(2, (int) am);
+                                    sd.setAmount((int) am);
                                     sd.reRender(frameshop);
 
                                 }
                             });
                             p.sendMessage(ChatColor.DARK_GREEN + frameshop.getMessage("confmessages.creating.global.passsettingamount"));
                             functions.getShopSet().get(p.getName()).set(0, 3);
-                            if (functions.getshopl().get(Serializer.unserializeLoc(slc)).getIntData(4) == 5 || functions.getshopl().get(Serializer.unserializeLoc(slc)).getIntData(4) == 6) {
+                            if (functions.getshopl().get(Serializer.unserializeLoc(slc)).getType() == 5 || functions.getshopl().get(Serializer.unserializeLoc(slc)).getType() == 6) {
                                 p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.creating.global.settingbuycost"));
                             } else {
                                 p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.creating.global.settingcost"));
@@ -424,12 +279,12 @@ public class ShopListeners implements Listener {
                                 @Override
                                 public void run() {
                                     ShopData sd = functions.getshopl().get(Serializer.unserializeLoc(slc));
-                                    sd.setData(0, am);
+                                    sd.setCost(am);
                                     sd.reRender(frameshop);
                                 }
                             });
 
-                            if (functions.getshopl().get(Serializer.unserializeLoc(slc)).getIntData(4) == 5 || functions.getshopl().get(Serializer.unserializeLoc(slc)).getIntData(4) == 6) {
+                            if (functions.getshopl().get(Serializer.unserializeLoc(slc)).getType() == 5 || functions.getshopl().get(Serializer.unserializeLoc(slc)).getType() == 6) {
                                 p.sendMessage(ChatColor.DARK_GREEN + frameshop.getMessage("confmessages.creating.global.passsettingbuycost"));
                                 functions.getShopSet().get(p.getName()).set(0, 4);
                                 p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.creating.global.settingsellcost"));
@@ -448,7 +303,7 @@ public class ShopListeners implements Listener {
                                 @Override
                                 public void run() {
                                     ShopData sd = functions.getshopl().get(Serializer.unserializeLoc(slc));
-                                    sd.setData(1, am);
+                                    sd.setSellCost(am);
                                     sd.reRender(frameshop);
                                 }
                             });
@@ -479,5 +334,64 @@ public class ShopListeners implements Listener {
     public void onPlayerLeft(PlayerQuitEvent e) {
         ShopListeners.functions.unload(e.getPlayer());
         functions.getShopSet().remove(e.getPlayer().getName());
+    }
+    
+    private void sellingToShop(ShopData sd, Player seller, boolean adminshop,boolean singlemode) {
+        if (sd.getInv() != null && sd.getType() != 0 && sd.getItem() != null && sd.getInv().firstEmpty() != -1) {
+                                    double cost;
+                                    if(singlemode)
+                                    {
+                                        cost=sd.getCost();
+                                    }
+                                    else
+                                    {
+                                        cost=sd.getSellCost();
+                                    }
+                                    if (!functions.checkItems(seller.getInventory(), sd.getItem())) {
+                                        seller.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.buying.errors.noitems"));
+                                        return;
+                                    }
+                                    if (!FrameStore.econ.withdrawPlayer(Bukkit.getOfflinePlayer(sd.getOwner()).getName(), cost).transactionSuccess()&&!adminshop) {
+                                        seller.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.selling.errors.notenoughmoney"));
+                                        return;
+                                    }
+                                    FrameStore.econ.depositPlayer(seller.getName(), cost);
+                                    if (!adminshop)
+                                    {
+                                        sd.getInv().addItem(sd.getItem());
+                                    }
+                                    functions.consumeItems(seller.getInventory(), sd.getItem());
+                                    String success = frameshop.getMessage("confmessages.interacting.selling.success").replaceAll("%amount%", String.valueOf(sd.getItem().getAmount())).replaceAll("%name%", sd.getItem().getType().toString());
+                                    seller.sendMessage(ChatColor.DARK_GREEN + success);
+                                } else {
+                                    seller.sendMessage(ChatColor.DARK_RED + "Shop is not configured or doesn't have enough space or you don't have items in inventory!");
+                                }
+    }
+    private void buyingFromShop(ShopData sd, Player p, boolean adminshop) {
+        if (sd.getInv() != null && sd.getType() != 0 && sd.getItem() != null && sd.getAmount() != 0) {
+                                if (!functions.checkItems(sd.getInv(), sd.getItem())&&!adminshop) {
+                                    p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.buying.errors.noitems"));
+                                    return;
+                                }
+                                if (p.getInventory().firstEmpty() == -1) {
+                                    p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.buying.errors.notenoughspace"));
+                                    return;
+                                }
+                                if (!FrameStore.econ.withdrawPlayer(p.getName(), sd.getCost()).transactionSuccess()) {
+
+                                    p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.buying.errors.notenoughmoney"));
+                                    return;
+                                }
+                                if(!adminshop)
+                                {
+                                    FrameStore.econ.depositPlayer(sd.getOwner(), sd.getCost());
+                                    functions.consumeItems(sd.getInv(), sd.getItem());
+                                }
+                                p.getInventory().addItem(sd.getItem());
+                                String success = frameshop.getMessage("confmessages.interacting.buying.success").replaceAll("%amount%", String.valueOf(sd.getItem().getAmount())).replaceAll("%name%", sd.getItem().getType().toString());
+                                p.sendMessage(ChatColor.DARK_GREEN + success);
+                            } else {
+                                p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.errors.notconfigured"));
+                            }
     }
 }

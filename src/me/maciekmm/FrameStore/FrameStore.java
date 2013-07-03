@@ -53,7 +53,7 @@ public class FrameStore extends JavaPlugin {
 
             log.info("[FrameStore] MySQL support enabled.");
         } else {
-            Database.db = new DatabaseConnector(this, this.getDataFolder() + File.pathSeparator + "shops.data");
+            Database.db = new DatabaseConnector(this, this.getDataFolder() + File.separator + "shops");
             //reloadShopConfig();
             log.info("[FrameStore] Sqlite support enabled.");
         }
@@ -209,7 +209,7 @@ public class FrameStore extends JavaPlugin {
                     return true;
                 }
             } else {
-                sender.sendMessage(ChatColor.DARK_RED+"Available arguments: reload");
+                sender.sendMessage(ChatColor.DARK_RED + "Available arguments: reload");
                 return true;
             }
         }
