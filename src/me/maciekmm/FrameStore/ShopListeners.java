@@ -86,7 +86,7 @@ public class ShopListeners implements Listener {
                             } else {
                                 remo.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.destroying.errors.notanowner"));
                             }
-                        } else if (sd.getOwner().equalsIgnoreCase(remo.getName()) || remo.isOp()) {
+                        } else if (sd.getOwner().equalsIgnoreCase(remo.getName()) || remo.isOp() || remo.hasPermission("framestore.admin")) {
                             sd.removeFD();
                             for (ItemStack is : sd.getInv().getContents()) {
                                 if (is != null) {
@@ -334,7 +334,7 @@ public class ShopListeners implements Listener {
 
     private void sellingToShop(ShopData sd, Player seller, boolean adminshop, boolean singlemode) {
         if (sd.getInv() != null && sd.getType() != 0 && sd.getItem() != null) {
-            if (!(adminshop && seller.hasPermission("framestore.use.sell.adminshop")) || (!adminshop && seller.hasPermission("framestore.use.sell.normal"))) {
+            if (!((adminshop && (seller.hasPermission("framestore.use.sell.adminshop")||seller.isOp())) || (!adminshop &&( seller.hasPermission("framestore.use.sell.normal")||seller.isOp())))) {
                 seller.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.creating.errors.permdenied"));
                 return;
             }
@@ -345,7 +345,7 @@ public class ShopListeners implements Listener {
                 cost = sd.getSellCost();
             }
             if (!functions.checkItems(seller.getInventory(), sd.getItem())) {
-                seller.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.buying.errors.noitems"));
+                seller.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.interacting.selling.errors.noitems"));
                 return;
             }
             if (sd.getInv().firstEmpty() == -1) {
@@ -370,7 +370,7 @@ public class ShopListeners implements Listener {
 
     private void buyingFromShop(ShopData sd, Player p, boolean adminshop) {
         if (sd.getInv() != null && sd.getType() != 0 && sd.getItem() != null && sd.getAmount() != 0) {
-            if (!(adminshop && p.hasPermission("framestore.use.buy.adminshop")) || (!adminshop && p.hasPermission("framestore.use.buy.normal"))) {
+            if (!((adminshop && p.hasPermission("framestore.use.buy.adminshop")) || (!adminshop && p.hasPermission("framestore.use.buy.normal")))) {
                 p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.creating.errors.permdenied"));
                 return;
             }
