@@ -42,7 +42,7 @@ public class ShopListeners implements Listener {
         }
         Entity en = e.getEntity();
         Player p = e.getPlayer();
-        if (en instanceof ItemFrame && p.getItemInHand().getItemMeta().hasLore() && p.hasPermission("framestore.create")) {
+        if (en instanceof ItemFrame && p.getItemInHand().getItemMeta().hasLore() && (p.hasPermission("framestore.create")||p.isOp())) {
             Iterator<Entity> it = en.getNearbyEntities(0.3, 0.3, 0.3).iterator();
             while (it.hasNext()) {
                 if (it.next() instanceof ItemFrame) {
@@ -62,7 +62,7 @@ public class ShopListeners implements Listener {
                 }
             }, 5);
 
-        } else if (p.getItemInHand().getItemMeta().hasLore() && !p.hasPermission("frameshop.create")) {
+        } else if (p.getItemInHand().getItemMeta().hasLore() && (!p.hasPermission("frameshop.create")&&!p.isOp())) {
             p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.creating.errors.permdenied"));
             e.setCancelled(true);
         }
@@ -78,7 +78,7 @@ public class ShopListeners implements Listener {
                     ShopData sd = functions.getshopl().get(e.getEntity().getLocation());
                     if (e.getRemover() instanceof Player) {
                         Player remo = (Player) e.getRemover();
-                        if (!sd.getOwner().equalsIgnoreCase(remo.getName()) && !remo.hasPermission("framestore.admin")) {
+                        if (!sd.getOwner().equalsIgnoreCase(remo.getName()) && (!remo.hasPermission("framestore.admin")&&!remo.isOp())) {
                             if (sd.getType() == 5) {
                                 sellingToShop(sd, remo, false, false);
                             } else if (sd.getType() == 6) {
@@ -164,7 +164,7 @@ public class ShopListeners implements Listener {
                             ArrayList<Object> al = new ArrayList<>();
                             al.add(0, 1);
                             al.add(1, Serializer.serializeLoc(enn.getLocation()));
-                            if (p.hasPermission("framestore.admin")) {
+                            if (p.hasPermission("framestore.admin")||p.isOp()) {
                                 p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.creating.global.admin.settingtype"));
                             } else {
                                 p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.creating.global.settingtype"));
@@ -224,7 +224,7 @@ public class ShopListeners implements Listener {
                 final String slc = String.valueOf(mode.get(1));
                 switch ((int) mode.get(0)) {
                     case 1:
-                        if (am == 2 || am == 1 || am == 5 || (p.hasPermission("framestore.admin") && am > 0 && am <= 6)) {
+                        if (am == 2 || am == 1 || am == 5 || ((p.hasPermission("framestore.admin")||p.isOp()) && am > 0 && am <= 6)) {
                             frameshop.getServer().getScheduler().runTask(frameshop, new Runnable() {
                                 @Override
                                 public void run() {
@@ -237,7 +237,7 @@ public class ShopListeners implements Listener {
                             functions.getShopSet().get(p.getName()).set(0, 2);
                             p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.creating.global.settingamount"));
 
-                        } else if (p.hasPermission("framestore.admin")) {
+                        } else if (p.hasPermission("framestore.admin")||p.isOp()) {
                             p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.creating.global.admin.passsettingtype"));
                         } else {
                             p.sendMessage(ChatColor.DARK_RED + frameshop.getMessage("confmessages.creating.global.settingtype"));
@@ -321,7 +321,7 @@ public class ShopListeners implements Listener {
 
     @EventHandler
     public void onPlayerSpawn(final PlayerJoinEvent e) { //Post Login Event, when sending maps in login event player(entity) was not spawned
-        if (e.getPlayer().hasPermission("framestore.admin") && FrameStore.update == true) {
+        if ((e.getPlayer().hasPermission("framestore.admin")||e.getPlayer().isOp()) && FrameStore.update == true) {
             e.getPlayer().sendMessage(ChatColor.DARK_RED + "New update of framestore is available, check http://dev.bukkit.org/server-mods/framestore/");
         }
     }

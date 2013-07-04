@@ -83,22 +83,20 @@ public class FrameStore extends JavaPlugin {
         if (this.getConfig().getBoolean("updatenotifications")) {
 
             try {
-                FileOutputStream fos = null;
+                FileOutputStream fos;
                 URL website = new URL("http://maciekmm.tk/framestore/ver.txt");
                 ReadableByteChannel rbc = Channels.newChannel(website.openStream());
                 fos = new FileOutputStream(ShopListeners.frameshop.getDataFolder() + File.separator + "ver.txt");
                 fos.getChannel().transferFrom(rbc, 0, 1 << 24);
                 try {
-                    BufferedReader br = new BufferedReader(new FileReader(ShopListeners.frameshop.getDataFolder() + File.separator + "ver.txt"));
-                    String s;
-                    while ((s = br.readLine()) != null && (s = s.trim()).length() > 0) {
-                        String f[] = s.split("\t");
-                        if (!this.getDescription().getVersion().equals(s)) {
-
-                            update = true;
+                    try (BufferedReader br = new BufferedReader(new FileReader(ShopListeners.frameshop.getDataFolder() + File.separator + "ver.txt"))) {
+                        String s;
+                        while ((s = br.readLine()) != null && (s = s.trim()).length() > 0) {
+                            if (!this.getDescription().getVersion().equals(s)) {
+                                update = true;
+                            }
                         }
                     }
-                    br.close();
                     new File(ShopListeners.frameshop.getDataFolder() + File.separator + "ver.txt").deleteOnExit();
                 } catch (FileNotFoundException ex) {
                     log.log(Level.SEVERE, null, ex);
@@ -122,7 +120,7 @@ public class FrameStore extends JavaPlugin {
                         if (!folder.exists()) {
                             folder.mkdir();
                         }
-                        URL website = new URL("http://s3.amazonaws.com/MinecraftDownload/minecraft.jar");
+                        URL website = new URL("https://s3.amazonaws.com/Minecraft.Download/versions/1.6.1/1.6.1.jar");
                         ReadableByteChannel rbc = Channels.newChannel(website.openStream());
                         fos = new FileOutputStream(ShopListeners.frameshop.getDataFolder() + File.separator + "textures" + File.separator + "minecraft.jar");
                         fos.getChannel().transferFrom(rbc, 0, 1 << 24);
@@ -134,10 +132,10 @@ public class FrameStore extends JavaPlugin {
                         ZipEntry ze = zis.getNextEntry();
 
                         while (ze != null) {
-
-                            if (ze.getName().startsWith("textures")) {
-                                String fileName = ze.getName();
-                                File newFile = new File(ShopListeners.frameshop.getDataFolder() + File.separator + fileName);
+ 
+                            if (ze.getName().startsWith("assets"+File.separator+"minecraft"+File.separator+"textures"+File.separator+"items")||ze.getName().startsWith("assets"+File.separator+"minecraft"+File.separator+"textures"+File.separator+"blocks")) {
+                                String[] fileName = ze.getName().split(File.separator);
+                                File newFile = new File(ShopListeners.frameshop.getDataFolder() +File.separator+fileName[fileName.length-3]+File.separator+File.separator+fileName[fileName.length-2]+File.separator+File.separator+fileName[fileName.length-1]);
 
                                 new File(newFile.getParent()).mkdirs();
                                 try (FileOutputStream fosf = new FileOutputStream(newFile)) {
@@ -195,14 +193,14 @@ public class FrameStore extends JavaPlugin {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (label.equalsIgnoreCase("fs")) {
+        if (label.equalsIgnoreCase("fs")||label.equalsIgnoreCase("framestore")) {
             if (args.length > 0) {
-                if (args[0].equalsIgnoreCase("reload") && sender.hasPermission("framestore.admin")) {
+                if (args[0].equalsIgnoreCase("reload") && (sender.hasPermission("framestore.admin")||sender.isOp())) {
                     this.reloadConfig();
                     sender.sendMessage(ChatColor.DARK_GREEN + "Successfully reloaded config!");
                     return true;
                 }
-                else if (args[0].equalsIgnoreCase("save") && sender.hasPermission("framestore.admin")) {
+                else if (args[0].equalsIgnoreCase("save") &&( sender.hasPermission("framestore.admin")||sender.isOp())) {
                     ShopListeners.functions.dumpToDatabase();
                     sender.sendMessage(ChatColor.DARK_GREEN + "Successfully saved shops!");
                     return true;
@@ -259,6 +257,7 @@ public class FrameStore extends JavaPlugin {
             "365:items/chickenRaw.png",
             "337:items/clay.png",
             "263:items/coal.png",
+            "263@1:items/charcoal.png",
             "404:items/comparator.png",
             "357:items/cookie.png",
             "264:items/diamond.png",
@@ -319,6 +318,7 @@ public class FrameStore extends JavaPlugin {
             "291:items/hoeStone.png",
             "290:items/hoeWood.png",
             "154:items/hopper.png",
+            "389:items/item_frame.png",
             "266:items/ingotGold.png",
             "265:items/ingotIron.png",
             "334:items/leather.png",
@@ -400,6 +400,11 @@ public class FrameStore extends JavaPlugin {
             "386:items/writingBook.png",
             "387:items/writtenBook.png",
             "348:items/yellowDust.png",
+            "417:items/iron_horse_armor.png",
+            "418:items/gold_horse_armor.png",
+            "419:items/diamond_horse_armor.png",
+            "421:items/name_tag.png",
+            "420:items/lead.png",
             "157:blocks/activatorRail.png",
             "145:blocks/anvil_top.png",
             "138:blocks/beacon.png",
@@ -416,22 +421,38 @@ public class FrameStore extends JavaPlugin {
             "81:blocks/cactus_side.png",
             "354:blocks/cake_top.png",
             "82:blocks/clay.png",
-            "35@0:blocks/cloth_0.png",
-            "35@1:blocks/cloth_1.png",
-            "35@2:blocks/cloth_2.png",
-            "35@3:blocks/cloth_3.png",
-            "35@4:blocks/cloth_4.png",
-            "35@5:blocks/cloth_5.png",
-            "35@6:blocks/cloth_6.png",
-            "35@7:blocks/cloth_7.png",
-            "35@8:blocks/cloth_8.png",
-            "35@9:blocks/cloth_9.png",
-            "35@10:blocks/cloth_10.png",
-            "35@11:blocks/cloth_11.png",
-            "35@12:blocks/cloth_12.png",
-            "35@13:blocks/cloth_13.png",
-            "35@14:blocks/cloth_14.png",
-            "35@15:blocks/cloth_15.png",
+            "35@0:blocks/wool_colored_white.png",
+            "35@1:blocks/wool_colored_orange.png",
+            "35@2:blocks/wool_colored_magenta.png",
+            "35@3:blocks/wool_colored_light_blue.png",
+            "35@4:blocks/wool_colored_yellow.png",
+            "35@5:blocks/wool_colored_lime.png",
+            "35@6:blocks/wool_colored_pink.png",
+            "35@7:blocks/wool_colored_gray.png",
+            "35@8:blocks/wool_colored_silver.png",
+            "35@9:blocks/wool_colored_cyan.png",
+            "35@10:blocks/wool_colored_purple.png",
+            "35@11:blocks/wool_colored_blue.png",
+            "35@12:blocks/wool_colored_brown.png",
+            "35@13:blocks/wool_colored_green.png",
+            "35@14:blocks/wool_colored_red.png",
+            "35@15:blocks/wool_colored_black.png",
+            "171@0:blocks/wool_colored_white.png",
+            "171@1:blocks/wool_colored_orange.png",
+            "171@2:blocks/wool_colored_magenta.png",
+            "171@3:blocks/wool_colored_light_blue.png",
+            "171@4:blocks/wool_colored_yellow.png",
+            "171@5:blocks/wool_colored_lime.png",
+            "171@6:blocks/wool_colored_pink.png",
+            "171@7:blocks/wool_colored_gray.png",
+            "171@8:blocks/wool_colored_silver.png",
+            "171@9:blocks/wool_colored_cyan.png",
+            "171@10:blocks/wool_colored_purple.png",
+            "171@11:blocks/wool_colored_blue.png",
+            "171@12:blocks/wool_colored_brown.png",
+            "171@13:blocks/wool_colored_green.png",
+            "171@14:blocks/wool_colored_red.png",
+            "171@15:blocks/wool_colored_black.png",
             "137:blocks/commandBlock.png",
             "151:blocks/daylightDetector_top.png",
             "32:blocks/deadbush.png",
@@ -514,7 +535,27 @@ public class FrameStore extends JavaPlugin {
             "5@2:blocks/wood_birch.png",
             "5@3:blocks/wood_jungle.png",
             "5@1:blocks/wood_spruce.png",
-            "58:blocks/workbench_front.png"
+            "58:blocks/workbench_front.png",
+            "172:blocks/hardened_clay.png",
+            "159@0:blocks/hardened_clay_stained_white.png",
+            "159@1:blocks/hardened_clay_stained_orange.png",
+            "159@2:blocks/hardened_clay_stained_magenta.png",
+            "159@3:blocks/hardened_clay_stained_light_blue.png",
+            "159@4:blocks/hardened_clay_stained_yellow.png",
+            "159@5:blocks/hardened_clay_stained_lime.png",
+            "159@6:blocks/hardened_clay_stained_pink.png",
+            "159@7:blocks/hardened_clay_stained_gray.png",
+            "159@8:blocks/hardened_clay_stained_silver.png",
+            "159@9:blocks/hardened_clay_stained_cyan.png",
+            "159@10:blocks/hardened_clay_stained_purple.png",
+            "159@11:blocks/hardened_clay_stained_blue.png",
+            "159@12:blocks/hardened_clay_stained_brown.png",
+            "159@13:blocks/hardened_clay_stained_green.png",
+            "159@14:blocks/hardened_clay_stained_red.png",
+            "159@15:blocks/hardened_clay_stained_black.png",
+            "170:blocks/hay_block_side.png",
+            "173:blocks/coal_block.png",
+            
         };
         String[] mapmessages = {
             "types.buy@§28;Buy (Right click to buy)",

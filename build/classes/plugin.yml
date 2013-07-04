@@ -8,6 +8,7 @@ commands:
    fs:
       description: FrameStore global command
       usage: /<command>
+      aliases: framestore
       permission: framestore.admin
 permissions:
    framestore.use.buy.adminshop:
