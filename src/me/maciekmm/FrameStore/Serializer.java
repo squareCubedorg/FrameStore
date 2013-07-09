@@ -4,14 +4,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.util.HashMap;
-import java.util.Map;
-import net.minecraft.server.v1_6_R1.NBTBase;
-import net.minecraft.server.v1_6_R1.NBTTagCompound;
-import net.minecraft.server.v1_6_R1.NBTTagList;
+import net.minecraft.server.v1_6_R2.NBTBase;
+import net.minecraft.server.v1_6_R2.NBTTagCompound;
+import net.minecraft.server.v1_6_R2.NBTTagList;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_6_R1.inventory.CraftInventoryCustom;
-import org.bukkit.craftbukkit.v1_6_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_6_R2.inventory.CraftInventoryCustom;
+import org.bukkit.craftbukkit.v1_6_R2.inventory.CraftItemStack;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -45,7 +43,7 @@ public class Serializer {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         DataOutputStream dataOutput = new DataOutputStream(outputStream);
         NBTTagList itemList = new NBTTagList();
-
+        
         // Save every element in the list
         for (int i = 0; i < inventory.getSize(); i++) {
             NBTTagCompound outputObject = new NBTTagCompound();
@@ -75,7 +73,7 @@ public class Serializer {
 
             if (!inputObject.isEmpty()) {
                 inventory.setItem(i, CraftItemStack.asCraftMirror(
-                        net.minecraft.server.v1_6_R1.ItemStack.createStack(inputObject)));
+                        net.minecraft.server.v1_6_R2.ItemStack.createStack(inputObject)));
             }
         }
 

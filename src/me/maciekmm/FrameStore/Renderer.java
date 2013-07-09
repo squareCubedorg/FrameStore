@@ -59,6 +59,7 @@ public class Renderer extends MapRenderer {
         this.sellcost = costs;
         this.item = item;
 
+        
     }
     @Override
     public void render(MapView map, MapCanvas canvas, Player p) {
