@@ -4,12 +4,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import net.minecraft.server.v1_6_R2.NBTBase;
-import net.minecraft.server.v1_6_R2.NBTTagCompound;
-import net.minecraft.server.v1_6_R2.NBTTagList;
+import net.minecraft.server.v1_6_R3.NBTBase;
+import net.minecraft.server.v1_6_R3.NBTTagCompound;
+import net.minecraft.server.v1_6_R3.NBTTagList;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_6_R2.inventory.CraftInventoryCustom;
-import org.bukkit.craftbukkit.v1_6_R2.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_6_R3.inventory.CraftInventoryCustom;
+import org.bukkit.craftbukkit.v1_6_R3.inventory.CraftItemStack;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -73,7 +73,7 @@ public class Serializer {
 
             if (!inputObject.isEmpty()) {
                 inventory.setItem(i, CraftItemStack.asCraftMirror(
-                        net.minecraft.server.v1_6_R2.ItemStack.createStack(inputObject)));
+                        net.minecraft.server.v1_6_R3.ItemStack.createStack(inputObject)));
             }
         }
 
